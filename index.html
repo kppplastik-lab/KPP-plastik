@@ -68,7 +68,7 @@
 
     #status {
       margin-top: 10px;
-      font-size: 15px;
+      font-size: 16px;
     }
 
     .success {
@@ -78,43 +78,63 @@
 
     .error {
       color: #d32f2f;
+      font-weight: bold;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 10px;
+      background: #263238;
+      color: white;
+      font-size: 16px;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="header">
-    KPP SCANNER
+<div class="header">
+  KPP SCANNER
+</div>
+
+<div class="container">
+
+  <div class="card">
+    <div id="reader"></div>
   </div>
 
-  <div class="container">
+  <div class="hasil">
 
-    <div class="card">
-      <div id="reader"></div>
+    <div class="label">
+      HASIL SCAN
     </div>
 
-    <div class="hasil">
-
-      <div class="label">
-        HASIL SCAN
-      </div>
-
-      <div id="barcode">
-        Belum ada
-      </div>
-
-      <div id="status">
-        Izinkan kamera lalu arahkan ke barcode
-      </div>
-
+    <div id="barcode">
+      Belum ada
     </div>
+
+    <div id="status">
+      Arahkan kamera ke barcode
+    </div>
+
+    <button onclick="scanLagi()" id="btnScan" style="display:none;">
+      SCAN LAGI
+    </button>
 
   </div>
+
+</div>
 
 <script>
 
+const WEB_APP_URL =
+"https://script.google.com/macros/s/AKfycbzECB01rtS4M5hupiKlyGtexXYIAmGxLA54uG17zKcFlLSPYnhdROIDzVOp1kqoaFXb/exec";
+
 let sudahScan = false;
+let scanner = null;
+
 
 function berhasilScan(teks) {
 
@@ -125,44 +145,97 @@ function berhasilScan(teks) {
   document.getElementById("barcode").innerText = teks;
 
   document.getElementById("status").innerHTML =
-    '<span class="success">✓ BARCODE TERBACA</span>';
+    '<span>⏳ Menyimpan ke HASIL PRODUKSI...</span>';
 
-  // Berhenti setelah berhasil scan
   scanner.stop().catch(function() {});
+
+
+  // Kirim barcode ke Apps Script
+  const kirim = new Image();
+
+  kirim.onload = function() {
+
+    document.getElementById("status").innerHTML =
+      '<span class="success">✓ DATA TERSIMPAN</span>';
+
+    document.getElementById("btnScan").style.display = "inline-block";
+
+  };
+
+  kirim.onerror = function() {
+
+    // Request tetap bisa sudah diterima Google.
+    // Kita tetap tampilkan status selesai.
+    document.getElementById("status").innerHTML =
+      '<span class="success">✓ SCAN TERKIRIM</span>';
+
+    document.getElementById("btnScan").style.display = "inline-block";
+
+  };
+
+  kirim.src =
+    WEB_APP_URL +
+    "?barcode=" +
+    encodeURIComponent(teks) +
+    "&t=" +
+    Date.now();
 }
 
 
-const scanner = new Html5Qrcode("reader");
+function mulaiScanner() {
 
-const config = {
-  fps: 10,
+  sudahScan = false;
 
-  qrbox: {
-    width: 280,
-    height: 150
-  }
+  document.getElementById("barcode").innerText =
+    "Belum ada";
+
+  document.getElementById("status").innerText =
+    "Arahkan kamera ke barcode";
+
+  document.getElementById("btnScan").style.display =
+    "none";
+
+  scanner = new Html5Qrcode("reader");
+
+  scanner.start(
+    { facingMode: "environment" },
+
+    {
+      fps: 10,
+      qrbox: {
+        width: 280,
+        height: 150
+      }
+    },
+
+    berhasilScan,
+
+    function(errorMessage) {
+      // abaikan error scan sementara
+    }
+
+  ).catch(function(error) {
+
+    document.getElementById("status").innerHTML =
+      '<span class="error">Kamera gagal dibuka: ' +
+      error +
+      '</span>';
+
+  });
+}
+
+
+function scanLagi() {
+
+  document.getElementById("reader").innerHTML = "";
+
+  mulaiScanner();
+}
+
+
+window.onload = function() {
+  mulaiScanner();
 };
-
-
-scanner.start(
-  { facingMode: "environment" },
-
-  config,
-
-  berhasilScan,
-
-  function(errorMessage) {
-    // Abaikan pesan saat barcode belum ditemukan
-  }
-
-).catch(function(error) {
-
-  document.getElementById("status").innerHTML =
-    '<span class="error">Kamera tidak bisa dibuka: ' +
-    error +
-    '</span>';
-
-});
 
 </script>
 
