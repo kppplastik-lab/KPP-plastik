@@ -9,6 +9,7 @@
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
+
     * {
       box-sizing: border-box;
     }
@@ -32,6 +33,40 @@
       width: 94%;
       max-width: 500px;
       margin: 20px auto;
+    }
+
+    .pilih {
+      background: white;
+      border-radius: 16px;
+      padding: 15px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.12);
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .judul {
+      font-size: 15px;
+      color: #777;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
+
+    .jenis-btn {
+      width: 48%;
+      padding: 14px 5px;
+      margin: 0;
+      border: 2px solid #263238;
+      border-radius: 10px;
+      background: white;
+      color: #263238;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .jenis-btn.aktif {
+      background: #263238;
+      color: white;
     }
 
     .card {
@@ -59,6 +94,13 @@
       color: #777;
     }
 
+    #jenisTerpilih {
+      margin-top: 5px;
+      font-size: 15px;
+      font-weight: bold;
+      color: #263238;
+    }
+
     #barcode {
       margin-top: 8px;
       font-size: 28px;
@@ -81,7 +123,15 @@
       font-weight: bold;
     }
 
+    .info {
+      color: #555;
+    }
+
     button {
+      cursor: pointer;
+    }
+
+    #btnScan {
       margin-top: 15px;
       padding: 12px 25px;
       border: none;
@@ -90,6 +140,7 @@
       color: white;
       font-size: 16px;
     }
+
   </style>
 </head>
 
@@ -99,16 +150,50 @@
   KPP SCANNER
 </div>
 
+
 <div class="container">
 
-  <div class="card">
-    <div id="reader"></div>
+  <!-- PILIH JENIS -->
+  <div class="pilih">
+
+    <div class="judul">
+      PILIH JENIS PRODUK
+    </div>
+
+    <button
+      class="jenis-btn"
+      id="btnPlafon"
+      onclick="pilihJenis('PLAFON')">
+      PLAFON
+    </button>
+
+    <button
+      class="jenis-btn"
+      id="btnWallboard"
+      onclick="pilihJenis('WALLBOARD')">
+      WALLBOARD
+    </button>
+
   </div>
 
+
+  <!-- CAMERA -->
+  <div class="card">
+
+    <div id="reader"></div>
+
+  </div>
+
+
+  <!-- HASIL -->
   <div class="hasil">
 
     <div class="label">
       HASIL SCAN
+    </div>
+
+    <div id="jenisTerpilih">
+      Pilih PLAFON atau WALLBOARD
     </div>
 
     <div id="barcode">
@@ -116,10 +201,13 @@
     </div>
 
     <div id="status">
-      Arahkan kamera ke barcode
+      Pilih jenis produk terlebih dahulu
     </div>
 
-    <button onclick="scanLagi()" id="btnScan" style="display:none;">
+    <button
+      onclick="scanLagi()"
+      id="btnScan"
+      style="display:none;">
       SCAN LAGI
     </button>
 
@@ -127,114 +215,290 @@
 
 </div>
 
+
 <script>
 
 const WEB_APP_URL =
 "https://script.google.com/macros/s/AKfycbzECB01rtS4M5hupiKlyGtexXYIAmGxLA54uG17zKcFlLSPYnhdROIDzVOp1kqoaFXb/exec";
 
+
 let sudahScan = false;
+
 let scanner = null;
 
+let jenisDipilih = "";
+
+
+/* ==========================================
+   PILIH PLAFON / WALLBOARD
+========================================== */
+
+function pilihJenis(jenis) {
+
+  jenisDipilih = jenis;
+
+  document.getElementById("btnPlafon")
+    .classList.remove("aktif");
+
+  document.getElementById("btnWallboard")
+    .classList.remove("aktif");
+
+
+  if (jenis === "PLAFON") {
+
+    document.getElementById("btnPlafon")
+      .classList.add("aktif");
+
+  }
+
+
+  if (jenis === "WALLBOARD") {
+
+    document.getElementById("btnWallboard")
+      .classList.add("aktif");
+
+  }
+
+
+  document.getElementById("jenisTerpilih")
+    .innerText = "JENIS: " + jenis;
+
+
+  document.getElementById("status")
+    .innerHTML =
+      '<span class="info">Arahkan kamera ke barcode ' +
+      jenis +
+      '</span>';
+
+
+  // Kalau scanner sedang berjalan,
+  // hentikan lalu mulai lagi
+  if (scanner) {
+
+    scanner.stop()
+      .then(function() {
+
+        document.getElementById("reader")
+          .innerHTML = "";
+
+        mulaiScanner();
+
+      })
+      .catch(function() {
+
+        document.getElementById("reader")
+          .innerHTML = "";
+
+        mulaiScanner();
+
+      });
+
+  } else {
+
+    mulaiScanner();
+
+  }
+
+}
+
+
+/* ==========================================
+   BARCODE BERHASIL DIBACA
+========================================== */
 
 function berhasilScan(teks) {
 
   if (sudahScan) return;
 
+  if (!jenisDipilih) {
+
+    document.getElementById("status")
+      .innerHTML =
+      '<span class="error">Pilih PLAFON atau WALLBOARD</span>';
+
+    return;
+  }
+
+
   sudahScan = true;
 
-  document.getElementById("barcode").innerText = teks;
 
-  document.getElementById("status").innerHTML =
-    '<span>⏳ Menyimpan ke HASIL PRODUKSI...</span>';
-
-  scanner.stop().catch(function() {});
+  document.getElementById("barcode")
+    .innerText = teks;
 
 
-  // Kirim barcode ke Apps Script
+  document.getElementById("status")
+    .innerHTML =
+      '<span>⏳ Menyimpan ke ' +
+      jenisDipilih +
+      '...</span>';
+
+
+  if (scanner) {
+
+    scanner.stop()
+      .catch(function() {});
+
+  }
+
+
+  /*
+    KIRIM BARCODE + JENIS
+  */
+
   const kirim = new Image();
+
 
   kirim.onload = function() {
 
-    document.getElementById("status").innerHTML =
-      '<span class="success">✓ DATA TERSIMPAN</span>';
+    document.getElementById("status")
+      .innerHTML =
+      '<span class="success">✓ DATA TERKIRIM</span>';
 
-    document.getElementById("btnScan").style.display = "inline-block";
+    document.getElementById("btnScan")
+      .style.display = "inline-block";
 
   };
+
 
   kirim.onerror = function() {
 
-    // Request tetap bisa sudah diterima Google.
-    // Kita tetap tampilkan status selesai.
-    document.getElementById("status").innerHTML =
+    /*
+      Browser bisa menganggap request
+      sebagai error karena beda domain,
+      walaupun Apps Script sudah menerima.
+    */
+
+    document.getElementById("status")
+      .innerHTML =
       '<span class="success">✓ SCAN TERKIRIM</span>';
 
-    document.getElementById("btnScan").style.display = "inline-block";
+    document.getElementById("btnScan")
+      .style.display = "inline-block";
 
   };
+
+
+  /*
+    INI BAGIAN PALING PENTING:
+
+    barcode = hasil barcode
+
+    jenis = PLAFON / WALLBOARD
+  */
 
   kirim.src =
     WEB_APP_URL +
     "?barcode=" +
     encodeURIComponent(teks) +
+    "&jenis=" +
+    encodeURIComponent(jenisDipilih) +
     "&t=" +
     Date.now();
+
 }
 
 
+/* ==========================================
+   MULAI SCANNER
+========================================== */
+
 function mulaiScanner() {
+
+  if (!jenisDipilih) {
+    return;
+  }
+
 
   sudahScan = false;
 
-  document.getElementById("barcode").innerText =
-    "Belum ada";
 
-  document.getElementById("status").innerText =
-    "Arahkan kamera ke barcode";
+  document.getElementById("barcode")
+    .innerText = "Belum ada";
 
-  document.getElementById("btnScan").style.display =
-    "none";
 
-  scanner = new Html5Qrcode("reader");
+  document.getElementById("status")
+    .innerHTML =
+      '<span class="info">Arahkan kamera ke barcode ' +
+      jenisDipilih +
+      '</span>';
+
+
+  document.getElementById("btnScan")
+    .style.display = "none";
+
+
+  scanner =
+    new Html5Qrcode("reader");
+
 
   scanner.start(
-    { facingMode: "environment" },
 
     {
+      facingMode: "environment"
+    },
+
+    {
+
       fps: 10,
+
       qrbox: {
+
         width: 280,
+
         height: 150
+
       }
+
     },
 
     berhasilScan,
 
     function(errorMessage) {
-      // abaikan error scan sementara
+
+      // Abaikan error scan sementara
+
     }
 
   ).catch(function(error) {
 
-    document.getElementById("status").innerHTML =
-      '<span class="error">Kamera gagal dibuka: ' +
+    document.getElementById("status")
+      .innerHTML =
+      '<span class="error">' +
+      'Kamera gagal dibuka: ' +
       error +
       '</span>';
 
   });
+
 }
 
+
+/* ==========================================
+   SCAN LAGI
+========================================== */
 
 function scanLagi() {
 
-  document.getElementById("reader").innerHTML = "";
+  document.getElementById("reader")
+    .innerHTML = "";
+
 
   mulaiScanner();
+
 }
 
 
+/* ==========================================
+   SAAT HALAMAN DIBUKA
+========================================== */
+
 window.onload = function() {
-  mulaiScanner();
+
+  document.getElementById("status")
+    .innerText =
+      "Pilih PLAFON atau WALLBOARD";
+
 };
 
 </script>
