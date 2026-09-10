@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>KPP Scanner</title>
+
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f1f3f4;
+    }
+
+    .header {
+      background: #263238;
+      color: white;
+      text-align: center;
+      padding: 18px;
+      font-size: 23px;
+      font-weight: bold;
+    }
+
+    .container {
+      width: 94%;
+      max-width: 500px;
+      margin: 20px auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 15px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.12);
+    }
+
+    #reader {
+      width: 100%;
+    }
+
+    .hasil {
+      margin-top: 18px;
+      text-align: center;
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.12);
+    }
+
+    .label {
+      font-size: 14px;
+      color: #777;
+    }
+
+    #barcode {
+      margin-top: 8px;
+      font-size: 28px;
+      font-weight: bold;
+      word-break: break-all;
+    }
+
+    #status {
+      margin-top: 10px;
+      font-size: 15px;
+    }
+
+    .success {
+      color: #168a3a;
+      font-weight: bold;
+    }
+
+    .error {
+      color: #d32f2f;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    KPP SCANNER
+  </div>
+
+  <div class="container">
+
+    <div class="card">
+      <div id="reader"></div>
+    </div>
+
+    <div class="hasil">
+
+      <div class="label">
+        HASIL SCAN
+      </div>
+
+      <div id="barcode">
+        Belum ada
+      </div>
+
+      <div id="status">
+        Izinkan kamera lalu arahkan ke barcode
+      </div>
+
+    </div>
+
+  </div>
+
+<script>
+
+let sudahScan = false;
+
+function berhasilScan(teks) {
+
+  if (sudahScan) return;
+
+  sudahScan = true;
+
+  document.getElementById("barcode").innerText = teks;
+
+  document.getElementById("status").innerHTML =
+    '<span class="success">✓ BARCODE TERBACA</span>';
+
+  // Berhenti setelah berhasil scan
+  scanner.stop().catch(function() {});
+}
+
+
+const scanner = new Html5Qrcode("reader");
+
+const config = {
+  fps: 10,
+
+  qrbox: {
+    width: 280,
+    height: 150
+  }
+};
+
+
+scanner.start(
+  { facingMode: "environment" },
+
+  config,
+
+  berhasilScan,
+
+  function(errorMessage) {
+    // Abaikan pesan saat barcode belum ditemukan
+  }
+
+).catch(function(error) {
+
+  document.getElementById("status").innerHTML =
+    '<span class="error">Kamera tidak bisa dibuka: ' +
+    error +
+    '</span>';
+
+});
+
+</script>
+
+</body>
+</html>
