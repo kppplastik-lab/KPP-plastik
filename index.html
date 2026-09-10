@@ -311,82 +311,34 @@ function berhasilScan(teks) {
 
   if (!jenisDipilih) {
 
-    document.getElementById("status")
-      .innerHTML =
+    document.getElementById("status").innerHTML =
       '<span class="error">Pilih PLAFON atau WALLBOARD</span>';
 
     return;
   }
 
+  // Bersihkan hasil barcode
+  teks = String(teks).trim();
 
   sudahScan = true;
 
+  document.getElementById("barcode").innerText = teks;
 
-  document.getElementById("barcode")
-    .innerText = teks;
+  document.getElementById("status").innerHTML =
+    '<span>⏳ Menyimpan ke ' + jenisDipilih + '...</span>';
 
-
-  document.getElementById("status")
-    .innerHTML =
-      '<span>⏳ Menyimpan ke ' +
-      jenisDipilih +
-      '...</span>';
-
-
+  // Matikan kamera setelah barcode terbaca
   if (scanner) {
-
-    scanner.stop()
-      .catch(function() {});
-
+    scanner.stop().catch(function() {});
   }
 
-
   /*
-    KIRIM BARCODE + JENIS
+    ==========================================
+    KIRIM LANGSUNG KE GOOGLE APPS SCRIPT
+    ==========================================
   */
 
-  const kirim = new Image();
-
-
-  kirim.onload = function() {
-
-    document.getElementById("status")
-      .innerHTML =
-      '<span class="success">✓ DATA TERKIRIM</span>';
-
-    document.getElementById("btnScan")
-      .style.display = "inline-block";
-
-  };
-
-
-  kirim.onerror = function() {
-
-    /*
-      Browser bisa menganggap request
-      sebagai error karena beda domain,
-      walaupun Apps Script sudah menerima.
-    */
-
-    document.getElementById("status")
-      .innerHTML =
-      '<span class="success">✓ SCAN TERKIRIM</span>';
-
-    document.getElementById("btnScan")
-      .style.display = "inline-block";
-
-  };
-
-
-  /*
-    INI BAGIAN PALING PENTING:
-
-    barcode = hasil barcode
-
-    jenis = PLAFON / WALLBOARD
-  */
-
-  kirim.src =
+  const url =
     WEB_APP_URL +
     "?barcode=" +
     encodeURIComponent(teks) +
@@ -395,6 +347,89 @@ function berhasilScan(teks) {
     "&t=" +
     Date.now();
 
+  // Buat iframe tersembunyi
+  let pengirim = document.getElementById("pengirim");
+
+  if (!pengirim) {
+
+    pengirim = document.createElement("iframe");
+
+    pengirim.id = "pengirim";
+
+    pengirim.style.display = "none";
+
+    document.body.appendChild(pengirim);
+  }
+
+  // KIRIM REQUEST
+  pengirim.src = url;
+
+  console.log("BARCODE:", teks);
+  console.log("JENIS:", jenisDipilih);
+  console.log("URL:", url);
+
+  // Tampilkan berhasil
+  setTimeout(function() {
+
+    document.getElementById("status").innerHTML =
+      '<span class="success">✓ DATA TERKIRIM KE ' +
+      jenisDipilih +
+      '</span>';
+
+    document.getElementById("btnScan")
+      .style.display = "inline-block";
+
+  }, 1500);
+}
+
+  /*
+    ==========================================
+    KIRIM LANGSUNG KE GOOGLE APPS SCRIPT
+    ==========================================
+  */
+
+  const url =
+    WEB_APP_URL +
+    "?barcode=" +
+    encodeURIComponent(teks) +
+    "&jenis=" +
+    encodeURIComponent(jenisDipilih) +
+    "&t=" +
+    Date.now();
+
+  // Buat iframe tersembunyi
+  let pengirim = document.getElementById("pengirim");
+
+  if (!pengirim) {
+
+    pengirim = document.createElement("iframe");
+
+    pengirim.id = "pengirim";
+
+    pengirim.style.display = "none";
+
+    document.body.appendChild(pengirim);
+  }
+
+  // KIRIM REQUEST
+  pengirim.src = url;
+
+  console.log("BARCODE:", teks);
+  console.log("JENIS:", jenisDipilih);
+  console.log("URL:", url);
+
+  // Tampilkan berhasil
+  setTimeout(function() {
+
+    document.getElementById("status").innerHTML =
+      '<span class="success">✓ DATA TERKIRIM KE ' +
+      jenisDipilih +
+      '</span>';
+
+    document.getElementById("btnScan")
+      .style.display = "inline-block";
+
+  }, 1500);
 }
 
 
