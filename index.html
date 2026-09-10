@@ -9,7 +9,7 @@
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
-    
+
     * {
       box-sizing: border-box;
     }
@@ -150,7 +150,6 @@
   KPP SCANNER
 </div>
 
-
 <div class="container">
 
   <!-- PILIH JENIS -->
@@ -176,14 +175,12 @@
 
   </div>
 
-
   <!-- CAMERA -->
   <div class="card">
 
     <div id="reader"></div>
 
   </div>
-
 
   <!-- HASIL -->
   <div class="hasil">
@@ -218,8 +215,17 @@
 
 <script>
 
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby0-lDl1Hf8qBPXvFf0AOVOQkMYsLCNDy_PTn9kpriQPc6oDhBBfc4uj2WyGAdDWI3Y/exec";
+/* ==========================================
+   LINK GOOGLE APPS SCRIPT
+========================================== */
 
+const WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycby0-lDl1Hf8qBPXvFf0AOVOQkMYsLCNDy_PTn9kpriQPc6oDhBBfc4uj2WyGAdDWI3Y/exec";
+
+
+/* ==========================================
+   VARIABLE
+========================================== */
 
 let sudahScan = false;
 
@@ -235,6 +241,8 @@ let jenisDipilih = "";
 function pilihJenis(jenis) {
 
   jenisDipilih = jenis;
+
+  sudahScan = false;
 
   document.getElementById("btnPlafon")
     .classList.remove("aktif");
@@ -265,13 +273,21 @@ function pilihJenis(jenis) {
 
   document.getElementById("status")
     .innerHTML =
-      '<span class="info">Arahkan kamera ke barcode ' +
+      '<span class="info">' +
+      'Arahkan kamera ke barcode ' +
       jenis +
       '</span>';
 
 
-  // Kalau scanner sedang berjalan,
-  // hentikan lalu mulai lagi
+  document.getElementById("btnScan")
+    .style.display = "none";
+
+
+  /*
+    Kalau scanner sebelumnya berjalan,
+    matikan dahulu.
+  */
+
   if (scanner) {
 
     scanner.stop()
@@ -309,33 +325,60 @@ function berhasilScan(teks) {
 
   if (sudahScan) return;
 
+
   if (!jenisDipilih) {
 
-    document.getElementById("status").innerHTML =
-      '<span class="error">Pilih PLAFON atau WALLBOARD</span>';
+    document.getElementById("status")
+      .innerHTML =
+      '<span class="error">' +
+      'Pilih PLAFON atau WALLBOARD' +
+      '</span>';
 
     return;
+
   }
 
-  // Bersihkan hasil barcode
+
+  /* Bersihkan barcode */
+
   teks = String(teks).trim();
+
+
+  if (!teks) return;
+
 
   sudahScan = true;
 
-  document.getElementById("barcode").innerText = teks;
 
-  document.getElementById("status").innerHTML =
-    '<span>⏳ Menyimpan ke ' + jenisDipilih + '...</span>';
+  document.getElementById("barcode")
+    .innerText = teks;
 
-  // Matikan kamera setelah barcode terbaca
+
+  document.getElementById("status")
+    .innerHTML =
+      '<span class="info">' +
+      '⏳ Menyimpan ke ' +
+      jenisDipilih +
+      '...' +
+      '</span>';
+
+
+  /*
+    MATIKAN KAMERA
+  */
+
   if (scanner) {
-    scanner.stop().catch(function() {});
+
+    scanner.stop()
+      .catch(function() {});
+
   }
 
+
   /*
-    ==========================================
-    KIRIM LANGSUNG KE GOOGLE APPS SCRIPT
-    ==========================================
+    ========================================
+    BUAT LINK REQUEST
+    ========================================
   */
 
   const url =
@@ -347,89 +390,71 @@ function berhasilScan(teks) {
     "&t=" +
     Date.now();
 
-  // Buat iframe tersembunyi
-  let pengirim = document.getElementById("pengirim");
 
-  if (!pengirim) {
+  console.log("================================");
+  console.log("KPP SCANNER");
+  console.log("BARCODE :", teks);
+  console.log("JENIS   :", jenisDipilih);
+  console.log("URL     :", url);
+  console.log("================================");
 
-    pengirim = document.createElement("iframe");
-
-    pengirim.id = "pengirim";
-
-    pengirim.style.display = "none";
-
-    document.body.appendChild(pengirim);
-  }
-
-  // KIRIM REQUEST
-  pengirim.src = url;
-
-  console.log("BARCODE:", teks);
-  console.log("JENIS:", jenisDipilih);
-  console.log("URL:", url);
-
-  // Tampilkan berhasil
-  setTimeout(function() {
-
-    document.getElementById("status").innerHTML =
-      '<span class="success">✓ DATA TERKIRIM KE ' +
-      jenisDipilih +
-      '</span>';
-
-    document.getElementById("btnScan")
-      .style.display = "inline-block";
-
-  }, 1500);
-}
 
   /*
-    ==========================================
-    KIRIM LANGSUNG KE GOOGLE APPS SCRIPT
-    ==========================================
+    ========================================
+    IFRAME PENGIRIM
+    ========================================
   */
 
-  const url =
-    WEB_APP_URL +
-    "?barcode=" +
-    encodeURIComponent(teks) +
-    "&jenis=" +
-    encodeURIComponent(jenisDipilih) +
-    "&t=" +
-    Date.now();
+  let pengirim =
+    document.getElementById("pengirim");
 
-  // Buat iframe tersembunyi
-  let pengirim = document.getElementById("pengirim");
 
   if (!pengirim) {
 
-    pengirim = document.createElement("iframe");
+    pengirim =
+      document.createElement("iframe");
 
     pengirim.id = "pengirim";
 
-    pengirim.style.display = "none";
+    pengirim.style.position = "fixed";
+    pengirim.style.width = "1px";
+    pengirim.style.height = "1px";
+    pengirim.style.left = "-9999px";
+    pengirim.style.top = "-9999px";
+    pengirim.style.border = "0";
+    pengirim.style.opacity = "0";
 
     document.body.appendChild(pengirim);
+
   }
 
-  // KIRIM REQUEST
+
+  /*
+    KIRIM LANGSUNG
+  */
+
   pengirim.src = url;
 
-  console.log("BARCODE:", teks);
-  console.log("JENIS:", jenisDipilih);
-  console.log("URL:", url);
 
-  // Tampilkan berhasil
+  /*
+    Tampilkan status setelah request
+  */
+
   setTimeout(function() {
 
-    document.getElementById("status").innerHTML =
-      '<span class="success">✓ DATA TERKIRIM KE ' +
-      jenisDipilih +
-      '</span>';
+    document.getElementById("status")
+      .innerHTML =
+        '<span class="success">' +
+        '✓ DATA TERKIRIM KE ' +
+        jenisDipilih +
+        '</span>';
+
 
     document.getElementById("btnScan")
       .style.display = "inline-block";
 
   }, 1500);
+
 }
 
 
@@ -453,7 +478,8 @@ function mulaiScanner() {
 
   document.getElementById("status")
     .innerHTML =
-      '<span class="info">Arahkan kamera ke barcode ' +
+      '<span class="info">' +
+      'Arahkan kamera ke barcode ' +
       jenisDipilih +
       '</span>';
 
@@ -462,9 +488,25 @@ function mulaiScanner() {
     .style.display = "none";
 
 
+  /*
+    Bersihkan reader
+  */
+
+  document.getElementById("reader")
+    .innerHTML = "";
+
+
+  /*
+    Buat scanner baru
+  */
+
   scanner =
     new Html5Qrcode("reader");
 
+
+  /*
+    Mulai kamera
+  */
 
   scanner.start(
 
@@ -490,7 +532,7 @@ function mulaiScanner() {
 
     function(errorMessage) {
 
-      // Abaikan error scan sementara
+      // Error scan sementara diabaikan
 
     }
 
@@ -498,10 +540,10 @@ function mulaiScanner() {
 
     document.getElementById("status")
       .innerHTML =
-      '<span class="error">' +
-      'Kamera gagal dibuka: ' +
-      error +
-      '</span>';
+        '<span class="error">' +
+        'Kamera gagal dibuka: ' +
+        error +
+        '</span>';
 
   });
 
@@ -516,6 +558,25 @@ function scanLagi() {
 
   document.getElementById("reader")
     .innerHTML = "";
+
+
+  document.getElementById("barcode")
+    .innerText = "Belum ada";
+
+
+  document.getElementById("status")
+    .innerHTML =
+      '<span class="info">' +
+      'Arahkan kamera ke barcode ' +
+      jenisDipilih +
+      '</span>';
+
+
+  document.getElementById("btnScan")
+    .style.display = "none";
+
+
+  sudahScan = false;
 
 
   mulaiScanner();
