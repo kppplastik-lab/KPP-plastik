@@ -348,7 +348,6 @@ function pilihJenis(jenis) {
 /* ==========================================
    BARCODE BERHASIL DIBACA
 ========================================== */
-
 function berhasilScan(teks) {
 
   if (sudahScan) return;
@@ -367,8 +366,9 @@ function berhasilScan(teks) {
   document.getElementById("barcode").innerText = teks;
 
   document.getElementById("status").innerHTML =
-    '<span class="info">⏳ MEMPROSES...</span>';
+    '<span class="info">⏳ MENYIMPAN KE SHEET...</span>';
 
+  // Matikan kamera
   if (scanner) {
     scanner.stop().catch(function () {});
   }
@@ -380,14 +380,12 @@ function berhasilScan(teks) {
     "&jenis=" +
     encodeURIComponent(jenisDipilih);
 
-  console.log("URL SCAN:", url);
+  console.log("BARCODE:", teks);
+  console.log("JENIS:", jenisDipilih);
+  console.log("URL:", url);
 
-  // PAKSA BUKA LINK APPS SCRIPT
-  const a = document.createElement("a");
-  a.href = url;
-  a.target = "_self";
-  document.body.appendChild(a);
-  a.click();
+  // LANGSUNG BUKA APPS SCRIPT
+  window.location.assign(url);
 }
 
 
