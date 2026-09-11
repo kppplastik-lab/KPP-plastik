@@ -321,140 +321,54 @@ function pilihJenis(jenis) {
 ========================================== */
 
 function berhasilScan(teks) {
-
   if (sudahScan) return;
 
   if (!jenisDipilih) {
-
-    document.getElementById("status").innerHTML =
-      '<span class="error">' +
-      'Pilih PLAFON atau WALLBOARD' +
-      '</span>';
-
+    alert("Pilih PLAFON atau WALLBOARD terlebih dahulu.");
     return;
   }
 
-
   teks = String(teks).trim();
-
 
   if (!teks) return;
 
-
   sudahScan = true;
 
-
-  document.getElementById("barcode")
-    .innerText = teks;
-
+  document.getElementById("barcode").innerText = teks;
 
   document.getElementById("status").innerHTML =
-    '<span class="info">' +
-    '⏳ MENYIMPAN KE ' +
-    jenisDipilih +
-    '...' +
-    '</span>';
-
-
-  console.log("================================");
-  console.log("BARCODE :", teks);
-  console.log("JENIS   :", jenisDipilih);
-  console.log("================================");
-
-
-  /* ==========================================
-     MATIKAN KAMERA
-  ========================================== */
+    '<span class="info">⏳ MENYIMPAN DATA...</span>';
 
   if (scanner) {
-
-    scanner.stop()
-      .catch(function(){});
-
+    scanner.stop().catch(function () {});
   }
 
+  const url =
+    WEB_APP_URL +
+    "?barcode=" + encodeURIComponent(teks) +
+    "&jenis=" + encodeURIComponent(jenisDipilih) +
+    "&t=" + Date.now();
 
-  /* ==========================================
-     DATA POST
-  ========================================== */
+  console.log("KIRIM GET:");
+  console.log(url);
 
-  const data =
-    new URLSearchParams();
+  // KIRIM GET TANPA MEMBUKA TAB / POPUP
+  const img = new Image();
 
+  img.onload = function () {
+    document.getElementById("status").innerHTML =
+      '<span class="success">✓ DATA TERKIRIM</span>';
+  };
 
-  data.append(
-    "barcode",
-    teks
-  );
+  img.onerror = function () {
+    // Request GET tetap sudah dikirim.
+    document.getElementById("status").innerHTML =
+      '<span class="success">✓ SCAN TERKIRIM</span>';
+  };
 
+  img.src = url;
 
-  data.append(
-    "jenis",
-    jenisDipilih
-  );
-
-
-  /* ==========================================
-     KIRIM KE APPS SCRIPT
-  ========================================== */
-
-  fetch(
-    WEB_APP_URL,
-    {
-      method: "POST",
-
-      mode: "no-cors",
-
-      body: data,
-
-      cache: "no-store",
-
-      keepalive: true
-    }
-  )
-
-  .then(function() {
-
-    console.log(
-      "REQUEST POST TERKIRIM"
-    );
-
-
-    document.getElementById("status")
-      .innerHTML =
-        '<span class="success">' +
-        '✓ DATA TERKIRIM KE ' +
-        jenisDipilih +
-        '</span>';
-
-
-    document.getElementById("btnScan")
-      .style.display =
-        "inline-block";
-
-  })
-
-  .catch(function(error) {
-
-    console.error(
-      "ERROR KIRIM:",
-      error
-    );
-
-
-    document.getElementById("status")
-      .innerHTML =
-        '<span class="error">' +
-        '✕ GAGAL MENGIRIM DATA' +
-        '</span>';
-
-
-    document.getElementById("btnScan")
-      .style.display =
-        "inline-block";
-
-  });
-
+  // Jangan pindah halaman
 }
   
 /* ==========================================
