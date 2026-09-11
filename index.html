@@ -321,6 +321,7 @@ function pilihJenis(jenis) {
 ========================================== */
 
 function berhasilScan(teks) {
+
   if (sudahScan) return;
 
   if (!jenisDipilih) {
@@ -349,30 +350,82 @@ function berhasilScan(teks) {
     "&jenis=" + encodeURIComponent(jenisDipilih) +
     "&t=" + Date.now();
 
-  console.log("URL SCAN:", url);
+  console.log("KIRIM BARCODE:");
+  console.log(url);
 
-  fetch(url, {
-    method: "GET",
-    mode: "no-cors",
-    cache: "no-store"
-  })
-  .then(function () {
+
+  /*
+     =========================================
+     KIRIM GET MENGGUNAKAN FORM TERSEMBUNYI
+     =========================================
+  */
+
+  let frame = document.getElementById("kirimFrame");
+
+  if (!frame) {
+
+    frame = document.createElement("iframe");
+
+    frame.id = "kirimFrame";
+    frame.name = "kirimFrame";
+
+    frame.style.display = "none";
+
+    document.body.appendChild(frame);
+
+  }
+
+
+  const form = document.createElement("form");
+
+  form.method = "GET";
+  form.action = WEB_APP_URL;
+  form.target = "kirimFrame";
+  form.style.display = "none";
+
+
+  const inputBarcode = document.createElement("input");
+
+  inputBarcode.type = "hidden";
+  inputBarcode.name = "barcode";
+  inputBarcode.value = teks;
+
+
+  const inputJenis = document.createElement("input");
+
+  inputJenis.type = "hidden";
+  inputJenis.name = "jenis";
+  inputJenis.value = jenisDipilih;
+
+
+  form.appendChild(inputBarcode);
+  form.appendChild(inputJenis);
+
+  document.body.appendChild(form);
+
+
+  console.log("FORM DIKIRIM KE APPS SCRIPT");
+
+  form.submit();
+
+
+  /*
+     Jangan menunggu response Google.
+     Setelah request dikirim, tampilkan status.
+  */
+
+  setTimeout(function () {
 
     document.getElementById("status").innerHTML =
-      '<span class="success">✓ DATA TERSIMPAN</span>';
+      '<span class="success">✓ DATA TERKIRIM</span>';
 
-    console.log("GET sudah dikirim ke Apps Script");
+    document.getElementById("btnScan")
+      .style.display = "inline-block";
 
-  })
-  .catch(function (err) {
+    form.remove();
 
-    console.error(err);
+  }, 2000);
 
-    document.getElementById("status").innerHTML =
-      '<span class="error">✕ GAGAL MENGIRIM</span>';
-
-    sudahScan = false;
-  });
 }
   
 /* ==========================================
