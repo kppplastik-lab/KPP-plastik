@@ -316,7 +316,6 @@ function pilihJenis(jenis) {
 
 }
 
-
 /* ==========================================
    BARCODE BERHASIL DIBACA
 ========================================== */
@@ -340,58 +339,59 @@ function berhasilScan(teks) {
   document.getElementById("barcode").innerText = teks;
 
   document.getElementById("status").innerHTML =
-    '<span class="info">⏳ MENYIMPAN KE ' +
-    jenisDipilih +
-    '...</span>';
+    '<span class="info">⏳ MENYIMPAN...</span>';
 
-  // MATIKAN KAMERA
   if (scanner) {
     scanner.stop().catch(function(){});
   }
 
-  console.log("================================");
-  console.log("BARCODE :", teks);
-  console.log("JENIS   :", jenisDipilih);
-  console.log("================================");
-
   // ==========================================
-  // KIRIM KE APPS SCRIPT TANPA POPUP
+  // BUAT URL GET
   // ==========================================
 
-  const data = new URLSearchParams();
+  const url =
+    WEB_APP_URL +
+    "?barcode=" + encodeURIComponent(teks) +
+    "&jenis=" + encodeURIComponent(jenisDipilih) +
+    "&t=" + Date.now();
 
-  data.append("barcode", teks);
-  data.append("jenis", jenisDipilih);
-
-  const terkirim = navigator.sendBeacon(
-    WEB_APP_URL,
-    data
-  );
-
-  console.log("SEND BEACON:", terkirim);
+  console.log("BARCODE:", teks);
+  console.log("JENIS:", jenisDipilih);
+  console.log("URL:", url);
 
   // ==========================================
-  // STATUS
+  // KIRIM GET TANPA POPUP
   // ==========================================
 
-  if (terkirim) {
+  fetch(url, {
+    method: "GET",
+    mode: "no-cors",
+    cache: "no-store"
+  })
+  .then(function() {
+
+    console.log("REQUEST GET TERKIRIM");
 
     document.getElementById("status").innerHTML =
-      '<span class="success">✓ DATA DIKIRIM KE ' +
+      '<span class="success">✓ DATA TERKIRIM KE ' +
       jenisDipilih +
       '</span>';
 
     document.getElementById("btnScan")
       .style.display = "inline-block";
 
-  } else {
+  })
+  .catch(function(error) {
+
+    console.error("ERROR:", error);
 
     document.getElementById("status").innerHTML =
-      '<span class="error">✕ GAGAL MENGIRIM DATA</span>';
+      '<span class="error">✕ GAGAL MENGIRIM</span>';
 
     document.getElementById("btnScan")
       .style.display = "inline-block";
-  }
+
+  });
 
 }
   
