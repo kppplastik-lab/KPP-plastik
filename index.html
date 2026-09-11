@@ -340,25 +340,82 @@ function berhasilScan(teks) {
   document.getElementById("barcode").innerText = teks;
 
   document.getElementById("status").innerHTML =
-    '<span class="info">⏳ MEMPROSES BARCODE...</span>';
+    '<span class="info">⏳ MENYIMPAN...</span>';
 
+  console.log("BARCODE:", teks);
+  console.log("JENIS:", jenisDipilih);
+
+  // MATIKAN KAMERA
   if (scanner) {
     scanner.stop().catch(function(){});
   }
 
-  // BUAT LINK YANG BENAR
+  // ==========================================
+  // BUAT URL
+  // ==========================================
+
   const url =
     WEB_APP_URL +
     "?barcode=" + encodeURIComponent(teks) +
     "&jenis=" + encodeURIComponent(jenisDipilih) +
     "&t=" + Date.now();
 
-  console.log("BARCODE:", teks);
-  console.log("JENIS:", jenisDipilih);
-  console.log("URL:", url);
+  console.log("URL KIRIM:", url);
 
-  // BUKA LINK APPS SCRIPT
-  window.location.href = url;
+  // ==========================================
+  // KIRIM DENGAN FORM GET
+  // ==========================================
+
+  const form = document.createElement("form");
+
+  form.method = "GET";
+  form.action = WEB_APP_URL;
+  form.target = "_blank";
+  form.style.display = "none";
+
+  const barcodeInput = document.createElement("input");
+  barcodeInput.type = "hidden";
+  barcodeInput.name = "barcode";
+  barcodeInput.value = teks;
+
+  const jenisInput = document.createElement("input");
+  jenisInput.type = "hidden";
+  jenisInput.name = "jenis";
+  jenisInput.value = jenisDipilih;
+
+  const timeInput = document.createElement("input");
+  timeInput.type = "hidden";
+  timeInput.name = "t";
+  timeInput.value = Date.now();
+
+  form.appendChild(barcodeInput);
+  form.appendChild(jenisInput);
+  form.appendChild(timeInput);
+
+  document.body.appendChild(form);
+
+  console.log("FORM DIKIRIM");
+
+  form.submit();
+
+  // ==========================================
+  // STATUS SCANNER
+  // ==========================================
+
+  setTimeout(function() {
+
+    form.remove();
+
+    document.getElementById("status").innerHTML =
+      '<span class="success">✓ DATA DIKIRIM KE ' +
+      jenisDipilih +
+      '</span>';
+
+    document.getElementById("btnScan")
+      .style.display = "inline-block";
+
+  }, 1500);
+
 }
   
 /* ==========================================
