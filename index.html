@@ -326,10 +326,8 @@ function berhasilScan(teks) {
   if (sudahScan) return;
 
   if (!jenisDipilih) {
-
     document.getElementById("status").innerHTML =
       '<span class="error">Pilih PLAFON atau WALLBOARD</span>';
-
     return;
   }
 
@@ -352,44 +350,86 @@ function berhasilScan(teks) {
   }
 
   // ==========================================
-  // BUAT LINK OTOMATIS
+  // BUAT IFRAME TERSEMBUNYI
   // ==========================================
 
-  const url =
-    WEB_APP_URL +
-    "?barcode=" +
-    encodeURIComponent(teks) +
-    "&jenis=" +
-    encodeURIComponent(jenisDipilih) +
-    "&t=" +
-    Date.now();
+  let iframe = document.getElementById("kppPengirim");
 
-  console.log("KIRIM OTOMATIS:");
-  console.log(url);
+  if (!iframe) {
 
-  // ==========================================
-  // KIRIM REQUEST TANPA PERLU KLIK LINK
-  // ==========================================
+    iframe = document.createElement("iframe");
 
-  const pengirim = document.createElement("script");
+    iframe.id = "kppPengirim";
 
-  pengirim.src = url;
+    iframe.name = "kppPengirim";
 
-  pengirim.async = true;
+    iframe.style.position = "fixed";
+    iframe.style.width = "1px";
+    iframe.style.height = "1px";
+    iframe.style.left = "-10000px";
+    iframe.style.top = "-10000px";
+    iframe.style.border = "0";
 
-  pengirim.onerror = function() {
-
-    // Error parsing response tidak berarti
-    // request gagal. Apps Script tetap menerima GET.
-
-    console.log("Request sudah dikirim ke Apps Script");
-
-  };
-
-  document.body.appendChild(pengirim);
+    document.body.appendChild(iframe);
+  }
 
   // ==========================================
-  // TUNGGU SEBENTAR AGAR APPS SCRIPT SELESAI
+  // BUAT FORM
+  // ==========================================
+
+  const form = document.createElement("form");
+
+  form.method = "GET";
+
+  form.action = WEB_APP_URL;
+
+  form.target = "kppPengirim";
+
+  form.style.display = "none";
+
+  // BARCODE
+  const inputBarcode = document.createElement("input");
+
+  inputBarcode.type = "hidden";
+  inputBarcode.name = "barcode";
+  inputBarcode.value = teks;
+
+  // JENIS
+  const inputJenis = document.createElement("input");
+
+  inputJenis.type = "hidden";
+  inputJenis.name = "jenis";
+  inputJenis.value = jenisDipilih;
+
+  // CACHE BUSTER
+  const inputTime = document.createElement("input");
+
+  inputTime.type = "hidden";
+  inputTime.name = "t";
+  inputTime.value = Date.now();
+
+  form.appendChild(inputBarcode);
+  form.appendChild(inputJenis);
+  form.appendChild(inputTime);
+
+  document.body.appendChild(form);
+
+  // ==========================================
+  // KIRIM OTOMATIS
+  // ==========================================
+
+  console.log("BARCODE:", teks);
+  console.log("JENIS:", jenisDipilih);
+
+  form.submit();
+
+  // Hapus form setelah dikirim
+  setTimeout(function() {
+    form.remove();
+  }, 3000);
+
+  // ==========================================
+  // TAMPILKAN STATUS
   // ==========================================
 
   setTimeout(function() {
@@ -403,7 +443,6 @@ function berhasilScan(teks) {
       .style.display = "inline-block";
 
   }, 2000);
-
 }
 
 /* ==========================================
