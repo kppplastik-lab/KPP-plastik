@@ -344,21 +344,26 @@ function berhasilScan(teks) {
     scanner.stop().catch(function () {});
   }
 
+  // =========================================
+  // BUAT URL LENGKAP
+  // =========================================
+
   const url =
     WEB_APP_URL +
     "?barcode=" + encodeURIComponent(teks) +
     "&jenis=" + encodeURIComponent(jenisDipilih) +
     "&t=" + Date.now();
 
-  console.log("KIRIM BARCODE:");
-  console.log(url);
+  console.log("=================================");
+  console.log("BARCODE :", teks);
+  console.log("JENIS   :", jenisDipilih);
+  console.log("URL     :", url);
+  console.log("=================================");
 
 
-  /*
-     =========================================
-     KIRIM GET MENGGUNAKAN FORM TERSEMBUNYI
-     =========================================
-  */
+  // =========================================
+  // IFRAME TERSEMBUNYI
+  // =========================================
 
   let frame = document.getElementById("kirimFrame");
 
@@ -369,50 +374,27 @@ function berhasilScan(teks) {
     frame.id = "kirimFrame";
     frame.name = "kirimFrame";
 
-    frame.style.display = "none";
+    frame.style.position = "fixed";
+    frame.style.width = "1px";
+    frame.style.height = "1px";
+    frame.style.border = "0";
+    frame.style.opacity = "0";
+    frame.style.pointerEvents = "none";
 
     document.body.appendChild(frame);
-
   }
 
 
-  const form = document.createElement("form");
+  // =========================================
+  // KIRIM URL LANGSUNG
+  // =========================================
 
-  form.method = "GET";
-  form.action = WEB_APP_URL;
-  form.target = "kirimFrame";
-  form.style.display = "none";
-
-
-  const inputBarcode = document.createElement("input");
-
-  inputBarcode.type = "hidden";
-  inputBarcode.name = "barcode";
-  inputBarcode.value = teks;
+  frame.src = url;
 
 
-  const inputJenis = document.createElement("input");
-
-  inputJenis.type = "hidden";
-  inputJenis.name = "jenis";
-  inputJenis.value = jenisDipilih;
-
-
-  form.appendChild(inputBarcode);
-  form.appendChild(inputJenis);
-
-  document.body.appendChild(form);
-
-
-  console.log("FORM DIKIRIM KE APPS SCRIPT");
-
-  form.submit();
-
-
-  /*
-     Jangan menunggu response Google.
-     Setelah request dikirim, tampilkan status.
-  */
+  // =========================================
+  // TUNGGU PROSES APPS SCRIPT
+  // =========================================
 
   setTimeout(function () {
 
@@ -422,9 +404,7 @@ function berhasilScan(teks) {
     document.getElementById("btnScan")
       .style.display = "inline-block";
 
-    form.remove();
-
-  }, 2000);
+  }, 3000);
 
 }
   
