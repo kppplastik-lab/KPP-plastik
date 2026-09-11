@@ -141,6 +141,21 @@
       font-size: 16px;
     }
 
+    /*
+      IFRAME PENGIRIM
+      Tidak terlihat oleh pengguna
+    */
+    #kirimFrame {
+      position: fixed;
+      left: -10000px;
+      top: -10000px;
+      width: 1px;
+      height: 1px;
+      border: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
   </style>
 </head>
 
@@ -175,12 +190,14 @@
 
   </div>
 
+
   <!-- CAMERA -->
   <div class="card">
 
     <div id="reader"></div>
 
   </div>
+
 
   <!-- HASIL -->
   <div class="hasil">
@@ -213,6 +230,16 @@
 </div>
 
 
+<!--
+  FRAME TERSEMBUNYI
+  Dipakai untuk mengirim GET ke Apps Script
+-->
+<iframe
+  id="kirimFrame"
+  name="kirimFrame">
+</iframe>
+
+
 <script>
 
 /* ==========================================
@@ -243,6 +270,7 @@ function pilihJenis(jenis) {
   jenisDipilih = jenis;
 
   sudahScan = false;
+
 
   document.getElementById("btnPlafon")
     .classList.remove("aktif");
@@ -316,6 +344,7 @@ function pilihJenis(jenis) {
 
 }
 
+
 /* ==========================================
    BARCODE BERHASIL DIBACA
 ========================================== */
@@ -324,90 +353,149 @@ function berhasilScan(teks) {
 
   if (sudahScan) return;
 
+
   if (!jenisDipilih) {
-    alert("Pilih PLAFON atau WALLBOARD terlebih dahulu.");
+
+    alert(
+      "Pilih PLAFON atau WALLBOARD terlebih dahulu."
+    );
+
     return;
   }
 
+
   teks = String(teks).trim();
+
 
   if (!teks) return;
 
+
   sudahScan = true;
 
-  document.getElementById("barcode").innerText = teks;
 
-  document.getElementById("status").innerHTML =
-    '<span class="info">⏳ MENYIMPAN...</span>';
+  /*
+    TAMPILKAN HASIL SCAN
+  */
+
+  document.getElementById("barcode")
+    .innerText = teks;
+
+
+  document.getElementById("status")
+    .innerHTML =
+      '<span class="info">⏳ MENYIMPAN...</span>';
+
+
+  /*
+    MATIKAN KAMERA
+  */
 
   if (scanner) {
-    scanner.stop().catch(function () {});
+
+    scanner.stop()
+      .catch(function() {});
+
   }
 
-  // =========================================
-  // BUAT URL LENGKAP
-  // =========================================
+
+  /*
+    =========================================
+    BUAT URL GET
+    =========================================
+  */
 
   const url =
     WEB_APP_URL +
-    "?barcode=" + encodeURIComponent(teks) +
-    "&jenis=" + encodeURIComponent(jenisDipilih) +
-    "&t=" + Date.now();
-
-  console.log("=================================");
-  console.log("BARCODE :", teks);
-  console.log("JENIS   :", jenisDipilih);
-  console.log("URL     :", url);
-  console.log("=================================");
+    "?barcode=" +
+    encodeURIComponent(teks) +
+    "&jenis=" +
+    encodeURIComponent(jenisDipilih) +
+    "&t=" +
+    Date.now();
 
 
-  // =========================================
-  // IFRAME TERSEMBUNYI
-  // =========================================
+  console.log(
+    "===================================="
+  );
 
-  let frame = document.getElementById("kirimFrame");
+  console.log(
+    "BARCODE :",
+    teks
+  );
 
-  if (!frame) {
+  console.log(
+    "JENIS   :",
+    jenisDipilih
+  );
 
-    frame = document.createElement("iframe");
+  console.log(
+    "URL     :",
+    url
+  );
 
-    frame.id = "kirimFrame";
-    frame.name = "kirimFrame";
-
-    frame.style.position = "fixed";
-    frame.style.width = "1px";
-    frame.style.height = "1px";
-    frame.style.border = "0";
-    frame.style.opacity = "0";
-    frame.style.pointerEvents = "none";
-
-    document.body.appendChild(frame);
-  }
-
-
-  // =========================================
-  // KIRIM URL LANGSUNG
-  // =========================================
-
-  frame.src = url;
+  console.log(
+    "===================================="
+  );
 
 
-  // =========================================
-  // TUNGGU PROSES APPS SCRIPT
-  // =========================================
+  /*
+    =========================================
+    KIRIM GET KE APPS SCRIPT
+    MENGGUNAKAN IFRAME TERSEMBUNYI
+    =========================================
+  */
 
-  setTimeout(function () {
+  const frame =
+    document.getElementById("kirimFrame");
 
-    document.getElementById("status").innerHTML =
-      '<span class="success">✓ DATA TERKIRIM</span>';
+
+  /*
+    Reset frame dahulu
+  */
+
+  frame.src = "about:blank";
+
+
+  /*
+    Tunggu sedikit agar reset selesai,
+    kemudian kirim URL sebenarnya.
+  */
+
+  setTimeout(function() {
+
+    frame.src = url;
+
+    console.log(
+      "GET DIKIRIM KE APPS SCRIPT"
+    );
+
+  }, 100);
+
+
+  /*
+    =========================================
+    STATUS
+    =========================================
+  */
+
+  setTimeout(function() {
+
+    document.getElementById("status")
+      .innerHTML =
+        '<span class="success">' +
+        '✓ DATA TERKIRIM' +
+        '</span>';
+
 
     document.getElementById("btnScan")
       .style.display = "inline-block";
 
+
   }, 3000);
 
 }
-  
+
+
 /* ==========================================
    MULAI SCANNER
 ========================================== */
@@ -482,7 +570,10 @@ function mulaiScanner() {
 
     function(errorMessage) {
 
-      // Error scan sementara diabaikan
+      /*
+        Error scan sementara
+        sengaja diabaikan
+      */
 
     }
 
@@ -505,6 +596,22 @@ function mulaiScanner() {
 ========================================== */
 
 function scanLagi() {
+
+  /*
+    Hentikan scanner lama
+  */
+
+  if (scanner) {
+
+    scanner.stop()
+      .catch(function() {});
+
+  }
+
+
+  /*
+    Bersihkan tampilan
+  */
 
   document.getElementById("reader")
     .innerHTML = "";
@@ -529,7 +636,15 @@ function scanLagi() {
   sudahScan = false;
 
 
-  mulaiScanner();
+  /*
+    Mulai scanner lagi
+  */
+
+  setTimeout(function() {
+
+    mulaiScanner();
+
+  }, 300);
 
 }
 
