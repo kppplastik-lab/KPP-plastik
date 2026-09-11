@@ -325,71 +325,133 @@ function berhasilScan(teks) {
   if (sudahScan) return;
 
   if (!jenisDipilih) {
+
     document.getElementById("status").innerHTML =
-      '<span class="error">Pilih PLAFON atau WALLBOARD</span>';
+      '<span class="error">' +
+      'Pilih PLAFON atau WALLBOARD' +
+      '</span>';
+
     return;
   }
 
+
   teks = String(teks).trim();
+
 
   if (!teks) return;
 
+
   sudahScan = true;
 
-  document.getElementById("barcode").innerText = teks;
+
+  document.getElementById("barcode")
+    .innerText = teks;
+
 
   document.getElementById("status").innerHTML =
-    '<span class="info">⏳ MENYIMPAN...</span>';
+    '<span class="info">' +
+    '⏳ MENYIMPAN KE ' +
+    jenisDipilih +
+    '...' +
+    '</span>';
+
+
+  console.log("================================");
+  console.log("BARCODE :", teks);
+  console.log("JENIS   :", jenisDipilih);
+  console.log("================================");
+
+
+  /* ==========================================
+     MATIKAN KAMERA
+  ========================================== */
 
   if (scanner) {
-    scanner.stop().catch(function(){});
+
+    scanner.stop()
+      .catch(function(){});
+
   }
 
-  // ==========================================
-  // BUAT URL GET
-  // ==========================================
 
-  const url =
-    WEB_APP_URL +
-    "?barcode=" + encodeURIComponent(teks) +
-    "&jenis=" + encodeURIComponent(jenisDipilih) +
-    "&t=" + Date.now();
+  /* ==========================================
+     DATA POST
+  ========================================== */
 
-  console.log("BARCODE:", teks);
-  console.log("JENIS:", jenisDipilih);
-  console.log("URL:", url);
+  const data =
+    new URLSearchParams();
 
-  // ==========================================
-  // KIRIM GET TANPA POPUP
-  // ==========================================
 
-  fetch(url, {
-    method: "GET",
-    mode: "no-cors",
-    cache: "no-store"
-  })
+  data.append(
+    "barcode",
+    teks
+  );
+
+
+  data.append(
+    "jenis",
+    jenisDipilih
+  );
+
+
+  /* ==========================================
+     KIRIM KE APPS SCRIPT
+  ========================================== */
+
+  fetch(
+    WEB_APP_URL,
+    {
+      method: "POST",
+
+      mode: "no-cors",
+
+      body: data,
+
+      cache: "no-store",
+
+      keepalive: true
+    }
+  )
+
   .then(function() {
 
-    console.log("REQUEST GET TERKIRIM");
+    console.log(
+      "REQUEST POST TERKIRIM"
+    );
 
-    document.getElementById("status").innerHTML =
-      '<span class="success">✓ DATA TERKIRIM KE ' +
-      jenisDipilih +
-      '</span>';
+
+    document.getElementById("status")
+      .innerHTML =
+        '<span class="success">' +
+        '✓ DATA TERKIRIM KE ' +
+        jenisDipilih +
+        '</span>';
+
 
     document.getElementById("btnScan")
-      .style.display = "inline-block";
+      .style.display =
+        "inline-block";
 
   })
+
   .catch(function(error) {
 
-    console.error("ERROR:", error);
+    console.error(
+      "ERROR KIRIM:",
+      error
+    );
 
-    document.getElementById("status").innerHTML =
-      '<span class="error">✕ GAGAL MENGIRIM</span>';
+
+    document.getElementById("status")
+      .innerHTML =
+        '<span class="error">' +
+        '✕ GAGAL MENGIRIM DATA' +
+        '</span>';
+
 
     document.getElementById("btnScan")
-      .style.display = "inline-block";
+      .style.display =
+        "inline-block";
 
   });
 
