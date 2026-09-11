@@ -342,29 +342,23 @@ function berhasilScan(teks) {
   document.getElementById("status").innerHTML =
     '<span class="info">⏳ MEMPROSES BARCODE...</span>';
 
-  console.log("================================");
-  console.log("BARCODE :", teks);
-  console.log("JENIS   :", jenisDipilih);
-  console.log("================================");
-
   if (scanner) {
     scanner.stop().catch(function(){});
   }
 
+  // BUAT LINK YANG BENAR
   const url =
     WEB_APP_URL +
-    "?barcode=" +
-    encodeURIComponent(teks) +
-    "&jenis=" +
-    encodeURIComponent(jenisDipilih) +
-    "&t=" +
-    Date.now();
+    "?barcode=" + encodeURIComponent(teks) +
+    "&jenis=" + encodeURIComponent(jenisDipilih) +
+    "&t=" + Date.now();
 
-  console.log("URL YANG DIKIRIM:");
-  console.log(url);
+  console.log("BARCODE:", teks);
+  console.log("JENIS:", jenisDipilih);
+  console.log("URL:", url);
 
-  // KIRIM LANGSUNG KE APPS SCRIPT
-  window.location.assign(url);
+  // BUKA LINK APPS SCRIPT
+  window.location.href = url;
 }
   
 /* ==========================================
