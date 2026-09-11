@@ -353,45 +353,22 @@ function berhasilScan(teks) {
   console.log("JENIS:", jenisDipilih);
 
   // ==========================================
-  // KIRIM KE APPS SCRIPT
+  // KIRIM LANGSUNG KE APPS SCRIPT
   // ==========================================
 
-  const data = new URLSearchParams();
+  const url =
+    WEB_APP_URL +
+    "?barcode=" +
+    encodeURIComponent(teks) +
+    "&jenis=" +
+    encodeURIComponent(jenisDipilih) +
+    "&t=" +
+    Date.now();
 
-  data.append("barcode", teks);
-  data.append("jenis", jenisDipilih);
+  console.log("KIRIM URL:", url);
 
-  fetch(WEB_APP_URL, {
-    method: "POST",
-    mode: "no-cors",
-    body: data,
-    cache: "no-store"
-  })
-  .then(function() {
-
-    console.log("Request berhasil dikirim");
-
-    document.getElementById("status").innerHTML =
-      '<span class="success">✓ DATA TERKIRIM KE ' +
-      jenisDipilih +
-      '</span>';
-
-    document.getElementById("btnScan")
-      .style.display = "inline-block";
-
-  })
-  .catch(function(error) {
-
-    console.error("Gagal kirim:", error);
-
-    document.getElementById("status").innerHTML =
-      '<span class="error">✕ GAGAL MENGIRIM DATA</span>';
-
-    document.getElementById("btnScan")
-      .style.display = "inline-block";
-
-  });
-
+  // LANGSUNG BUKA REQUEST
+  window.location.href = url;
 }
 
 /* ==========================================
