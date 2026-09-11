@@ -329,6 +329,7 @@ function berhasilScan(teks) {
   }
 
   teks = String(teks).trim();
+
   if (!teks) return;
 
   sudahScan = true;
@@ -346,42 +347,32 @@ function berhasilScan(teks) {
     WEB_APP_URL +
     "?barcode=" + encodeURIComponent(teks) +
     "&jenis=" + encodeURIComponent(jenisDipilih) +
-    "&callback=hasilScanServer" +
     "&t=" + Date.now();
 
-  console.log("KIRIM:", url);
+  console.log("URL SCAN:", url);
 
-  const script = document.createElement("script");
+  fetch(url, {
+    method: "GET",
+    mode: "no-cors",
+    cache: "no-store"
+  })
+  .then(function () {
 
-  script.src = url;
-
-  script.onload = function () {
-    console.log("Request berhasil dikirim");
-  };
-
-  script.onerror = function () {
-    console.log("Request selesai / response bukan script");
-  };
-
-  document.body.appendChild(script);
-}
-
-
-function hasilScanServer(data) {
-  console.log("BALASAN SERVER:", data);
-
-  if (data && data.status === "OK") {
     document.getElementById("status").innerHTML =
-      '<span class="success">✓ BERHASIL DISIMPAN</span>';
-  } 
-  else if (data && data.status === "DUPLIKAT") {
+      '<span class="success">✓ DATA TERSIMPAN</span>';
+
+    console.log("GET sudah dikirim ke Apps Script");
+
+  })
+  .catch(function (err) {
+
+    console.error(err);
+
     document.getElementById("status").innerHTML =
-      '<span class="info">⚠ BARCODE SUDAH PERNAH SCAN</span>';
-  } 
-  else {
-    document.getElementById("status").innerHTML =
-      '<span class="error">✕ GAGAL MENYIMPAN</span>';
-  }
+      '<span class="error">✕ GAGAL MENGIRIM</span>';
+
+    sudahScan = false;
+  });
 }
   
 /* ==========================================
