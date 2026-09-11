@@ -345,7 +345,6 @@ function berhasilScan(teks) {
   console.log("BARCODE:", teks);
   console.log("JENIS:", jenisDipilih);
 
-  // MATIKAN KAMERA
   if (scanner) {
     scanner.stop().catch(function(){});
   }
@@ -360,51 +359,33 @@ function berhasilScan(teks) {
     "&jenis=" + encodeURIComponent(jenisDipilih) +
     "&t=" + Date.now();
 
-  console.log("URL KIRIM:", url);
+  console.log("URL:", url);
 
   // ==========================================
-  // KIRIM DENGAN FORM GET
+  // KIRIM MELALUI IFRAME TERSEMBUNYI
+  // TIDAK MEMBUKA POP-UP
   // ==========================================
 
-  const form = document.createElement("form");
+  let pengirim = document.getElementById("pengirimKPP");
 
-  form.method = "GET";
-  form.action = WEB_APP_URL;
-  form.target = "_blank";
-  form.style.display = "none";
+  if (!pengirim) {
 
-  const barcodeInput = document.createElement("input");
-  barcodeInput.type = "hidden";
-  barcodeInput.name = "barcode";
-  barcodeInput.value = teks;
+    pengirim = document.createElement("iframe");
 
-  const jenisInput = document.createElement("input");
-  jenisInput.type = "hidden";
-  jenisInput.name = "jenis";
-  jenisInput.value = jenisDipilih;
+    pengirim.id = "pengirimKPP";
 
-  const timeInput = document.createElement("input");
-  timeInput.type = "hidden";
-  timeInput.name = "t";
-  timeInput.value = Date.now();
+    pengirim.style.display = "none";
 
-  form.appendChild(barcodeInput);
-  form.appendChild(jenisInput);
-  form.appendChild(timeInput);
+    document.body.appendChild(pengirim);
+  }
 
-  document.body.appendChild(form);
-
-  console.log("FORM DIKIRIM");
-
-  form.submit();
+  pengirim.src = url;
 
   // ==========================================
-  // STATUS SCANNER
+  // TAMPILKAN STATUS
   // ==========================================
 
   setTimeout(function() {
-
-    form.remove();
 
     document.getElementById("status").innerHTML =
       '<span class="success">✓ DATA DIKIRIM KE ' +
@@ -414,7 +395,7 @@ function berhasilScan(teks) {
     document.getElementById("btnScan")
       .style.display = "inline-block";
 
-  }, 1500);
+  }, 2000);
 
 }
   
