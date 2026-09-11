@@ -340,52 +340,41 @@ function berhasilScan(teks) {
   document.getElementById("barcode").innerText = teks;
 
   document.getElementById("status").innerHTML =
-    '<span class="info">⏳ MENYIMPAN...</span>';
+    '<span class="info">⏳ MENYIMPAN KE ' +
+    jenisDipilih +
+    '...</span>';
 
-  console.log("BARCODE:", teks);
-  console.log("JENIS:", jenisDipilih);
-
+  // MATIKAN KAMERA
   if (scanner) {
     scanner.stop().catch(function(){});
   }
 
-  // ==========================================
-  // BUAT URL
-  // ==========================================
-
-  const url =
-    WEB_APP_URL +
-    "?barcode=" + encodeURIComponent(teks) +
-    "&jenis=" + encodeURIComponent(jenisDipilih) +
-    "&t=" + Date.now();
-
-  console.log("URL:", url);
+  console.log("================================");
+  console.log("BARCODE :", teks);
+  console.log("JENIS   :", jenisDipilih);
+  console.log("================================");
 
   // ==========================================
-  // KIRIM MELALUI IFRAME TERSEMBUNYI
-  // TIDAK MEMBUKA POP-UP
+  // KIRIM KE APPS SCRIPT TANPA POPUP
   // ==========================================
 
-  let pengirim = document.getElementById("pengirimKPP");
+  const data = new URLSearchParams();
 
-  if (!pengirim) {
+  data.append("barcode", teks);
+  data.append("jenis", jenisDipilih);
 
-    pengirim = document.createElement("iframe");
+  const terkirim = navigator.sendBeacon(
+    WEB_APP_URL,
+    data
+  );
 
-    pengirim.id = "pengirimKPP";
-
-    pengirim.style.display = "none";
-
-    document.body.appendChild(pengirim);
-  }
-
-  pengirim.src = url;
+  console.log("SEND BEACON:", terkirim);
 
   // ==========================================
-  // TAMPILKAN STATUS
+  // STATUS
   // ==========================================
 
-  setTimeout(function() {
+  if (terkirim) {
 
     document.getElementById("status").innerHTML =
       '<span class="success">✓ DATA DIKIRIM KE ' +
@@ -395,7 +384,14 @@ function berhasilScan(teks) {
     document.getElementById("btnScan")
       .style.display = "inline-block";
 
-  }, 2000);
+  } else {
+
+    document.getElementById("status").innerHTML =
+      '<span class="error">✕ GAGAL MENGIRIM DATA</span>';
+
+    document.getElementById("btnScan")
+      .style.display = "inline-block";
+  }
 
 }
   
