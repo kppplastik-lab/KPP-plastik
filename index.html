@@ -340,21 +340,16 @@ function berhasilScan(teks) {
   document.getElementById("barcode").innerText = teks;
 
   document.getElementById("status").innerHTML =
-    '<span class="info">⏳ Menyimpan ke ' +
-    jenisDipilih +
-    '...</span>';
+    '<span class="info">⏳ MEMPROSES BARCODE...</span>';
 
-  // MATIKAN KAMERA
+  console.log("================================");
+  console.log("BARCODE :", teks);
+  console.log("JENIS   :", jenisDipilih);
+  console.log("================================");
+
   if (scanner) {
     scanner.stop().catch(function(){});
   }
-
-  console.log("BARCODE:", teks);
-  console.log("JENIS:", jenisDipilih);
-
-  // ==========================================
-  // KIRIM LANGSUNG KE APPS SCRIPT
-  // ==========================================
 
   const url =
     WEB_APP_URL +
@@ -365,12 +360,13 @@ function berhasilScan(teks) {
     "&t=" +
     Date.now();
 
-  console.log("KIRIM URL:", url);
+  console.log("URL YANG DIKIRIM:");
+  console.log(url);
 
-  // LANGSUNG BUKA REQUEST
-  window.location.href = url;
+  // KIRIM LANGSUNG KE APPS SCRIPT
+  window.location.assign(url);
 }
-
+  
 /* ==========================================
    MULAI SCANNER
 ========================================== */
