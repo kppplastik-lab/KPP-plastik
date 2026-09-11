@@ -325,55 +325,86 @@ function berhasilScan(teks) {
 
   if (sudahScan) return;
 
-
   if (!jenisDipilih) {
 
-    document.getElementById("status")
-      .innerHTML =
-      '<span class="error">' +
-      'Pilih PLAFON atau WALLBOARD' +
-      '</span>';
+    document.getElementById("status").innerHTML =
+      '<span class="error">Pilih PLAFON atau WALLBOARD</span>';
 
     return;
-
   }
-
-
-  /* Bersihkan barcode */
 
   teks = String(teks).trim();
 
-
   if (!teks) return;
-
 
   sudahScan = true;
 
+  document.getElementById("barcode").innerText = teks;
 
-  document.getElementById("barcode")
-    .innerText = teks;
+  document.getElementById("status").innerHTML =
+    '<span class="info">⏳ Menyimpan ke ' +
+    jenisDipilih +
+    '...</span>';
 
-
-  document.getElementById("status")
-    .innerHTML =
-      '<span class="info">' +
-      '⏳ Menyimpan ke ' +
-      jenisDipilih +
-      '...' +
-      '</span>';
-
-
-  /*
-    MATIKAN KAMERA
-  */
-
+  // MATIKAN KAMERA
   if (scanner) {
-
-    scanner.stop()
-      .catch(function() {});
-
+    scanner.stop().catch(function(){});
   }
 
+  // ==========================================
+  // BUAT LINK OTOMATIS
+  // ==========================================
+
+  const url =
+    WEB_APP_URL +
+    "?barcode=" +
+    encodeURIComponent(teks) +
+    "&jenis=" +
+    encodeURIComponent(jenisDipilih) +
+    "&t=" +
+    Date.now();
+
+  console.log("KIRIM OTOMATIS:");
+  console.log(url);
+
+  // ==========================================
+  // KIRIM REQUEST TANPA PERLU KLIK LINK
+  // ==========================================
+
+  const pengirim = document.createElement("script");
+
+  pengirim.src = url;
+
+  pengirim.async = true;
+
+  pengirim.onerror = function() {
+
+    // Error parsing response tidak berarti
+    // request gagal. Apps Script tetap menerima GET.
+
+    console.log("Request sudah dikirim ke Apps Script");
+
+  };
+
+  document.body.appendChild(pengirim);
+
+  // ==========================================
+  // TUNGGU SEBENTAR AGAR APPS SCRIPT SELESAI
+  // ==========================================
+
+  setTimeout(function() {
+
+    document.getElementById("status").innerHTML =
+      '<span class="success">✓ DATA TERKIRIM KE ' +
+      jenisDipilih +
+      '</span>';
+
+    document.getElementById("btnScan")
+      .style.display = "inline-block";
+
+  }, 2000);
+
+}
 
   /*
     ========================================
