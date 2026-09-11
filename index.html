@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
   <meta charset="UTF-8">
@@ -12,17 +13,20 @@
 
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
+
   <style>
 
     * {
       box-sizing: border-box;
     }
 
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: #f1f3f4;
     }
+
 
     .header {
       background: #263238;
@@ -33,11 +37,13 @@
       font-weight: bold;
     }
 
+
     .container {
       width: 94%;
       max-width: 500px;
       margin: 20px auto;
     }
+
 
     .pilih {
       background: white;
@@ -48,6 +54,7 @@
       text-align: center;
     }
 
+
     .judul {
       font-size: 15px;
       color: #777;
@@ -55,23 +62,24 @@
       font-weight: bold;
     }
 
+
     .jenis-btn {
       width: 48%;
       padding: 14px 5px;
-      margin: 0;
       border: 2px solid #263238;
       border-radius: 10px;
       background: white;
       color: #263238;
       font-size: 16px;
       font-weight: bold;
-      cursor: pointer;
     }
+
 
     .jenis-btn.aktif {
       background: #263238;
       color: white;
     }
+
 
     .card {
       background: white;
@@ -80,9 +88,11 @@
       box-shadow: 0 3px 12px rgba(0,0,0,.12);
     }
 
+
     #reader {
       width: 100%;
     }
+
 
     .hasil {
       margin-top: 18px;
@@ -93,10 +103,12 @@
       box-shadow: 0 3px 12px rgba(0,0,0,.12);
     }
 
+
     .label {
       font-size: 14px;
       color: #777;
     }
+
 
     #jenisTerpilih {
       margin-top: 5px;
@@ -105,6 +117,7 @@
       color: #263238;
     }
 
+
     #barcode {
       margin-top: 8px;
       font-size: 28px;
@@ -112,28 +125,29 @@
       word-break: break-all;
     }
 
+
     #status {
       margin-top: 10px;
       font-size: 16px;
     }
+
 
     .success {
       color: #168a3a;
       font-weight: bold;
     }
 
+
     .error {
       color: #d32f2f;
       font-weight: bold;
     }
 
+
     .info {
       color: #555;
     }
 
-    button {
-      cursor: pointer;
-    }
 
     #btnScan {
       margin-top: 15px;
@@ -143,6 +157,29 @@
       background: #263238;
       color: white;
       font-size: 16px;
+    }
+
+
+    /* ==========================================
+       IFRAME TERSEMBUNYI
+    ========================================== */
+
+    #kirimFrame {
+
+      position: fixed;
+
+      left: -9999px;
+
+      top: -9999px;
+
+      width: 1px;
+
+      height: 1px;
+
+      border: 0;
+
+      opacity: 0;
+
     }
 
   </style>
@@ -192,7 +229,6 @@
   </div>
 
 
-
   <!-- CAMERA -->
 
   <div class="card">
@@ -200,7 +236,6 @@
     <div id="reader"></div>
 
   </div>
-
 
 
   <!-- HASIL -->
@@ -238,8 +273,17 @@
 
   </div>
 
-
 </div>
+
+
+<!-- ==========================================
+     IFRAME PENGIRIM
+========================================== -->
+
+<iframe
+  id="kirimFrame"
+  name="kirimFrame">
+</iframe>
 
 
 
@@ -247,7 +291,7 @@
 
 
 /* =====================================================
-   URL WEB APP APPS SCRIPT
+   APPS SCRIPT
 ===================================================== */
 
 const WEB_APP_URL =
@@ -321,7 +365,8 @@ function pilihJenis(jenis) {
 
   document
     .getElementById("btnScan")
-    .style.display = "none";
+    .style.display =
+      "none";
 
 
   if (scanner) {
@@ -364,7 +409,10 @@ function pilihJenis(jenis) {
 
 function berhasilScan(teks) {
 
-  if (sudahScan) return;
+  if (sudahScan) {
+    return;
+  }
+
 
   if (!jenisDipilih) {
 
@@ -373,115 +421,114 @@ function berhasilScan(teks) {
     );
 
     return;
+
   }
 
-  teks = String(teks).trim();
 
-  if (!teks) return;
+  teks =
+    String(teks).trim();
+
+
+  if (!teks) {
+    return;
+  }
 
 
   sudahScan = true;
 
 
-  document.getElementById("barcode")
-    .innerText = teks;
+  document
+    .getElementById("barcode")
+    .innerText =
+      teks;
 
 
-  document.getElementById("status")
+  document
+    .getElementById("status")
     .innerHTML =
       '<span class="info">' +
       '⏳ MENYIMPAN KE SHEET...' +
       '</span>';
 
 
-  /*
-   * MATIKAN KAMERA SEMENTARA
-   */
+  /* -----------------------------------------------------
+     STOP CAMERA
+  ----------------------------------------------------- */
 
   if (scanner) {
 
     scanner
       .stop()
-      .catch(function () {});
+      .catch(function() {});
 
   }
 
 
-  /*
-   * BUAT LINK APPS SCRIPT
-   */
+  /* -----------------------------------------------------
+     BUAT URL
+  ----------------------------------------------------- */
 
   const url =
     WEB_APP_URL +
     "?barcode=" +
     encodeURIComponent(teks) +
     "&jenis=" +
-    encodeURIComponent(jenisDipilih);
-
-
-  console.log("================================");
-  console.log("BARCODE :", teks);
-  console.log("JENIS   :", jenisDipilih);
-  console.log("URL     :", url);
-  console.log("================================");
-
-
-  /*
-   * KIRIM KE APPS SCRIPT
-   * TANPA MENINGGALKAN HALAMAN SCANNER
-   */
-
-  const img = new Image();
-
-  img.onload = function () {
-
-    console.log("REQUEST SELESAI");
-
-    document.getElementById("status")
-      .innerHTML =
-        '<span class="success">' +
-        '✓ DATA TERKIRIM KE SHEET' +
-        '</span>';
-
-    document.getElementById("btnScan")
-      .style.display = "inline-block";
-
-  };
-
-
-  img.onerror = function () {
-
-    /*
-     * Apps Script sering dianggap error
-     * oleh browser karena cross-origin,
-     * walaupun request GET sebenarnya sudah
-     * sampai ke server.
-     */
-
-    console.log("REQUEST SELESAI / CROSS ORIGIN");
-
-
-    document.getElementById("status")
-      .innerHTML =
-        '<span class="success">' +
-        '✓ DATA TERKIRIM KE SHEET' +
-        '</span>';
-
-
-    document.getElementById("btnScan")
-      .style.display = "inline-block";
-
-  };
-
-
-  /*
-   * INI YANG MENGIRIM REQUEST
-   */
-
-  img.src =
-    url +
+    encodeURIComponent(jenisDipilih) +
     "&t=" +
-    new Date().getTime();
+    Date.now();
+
+
+  console.log(
+    "SCAN BARCODE:",
+    teks
+  );
+
+
+  console.log(
+    "JENIS:",
+    jenisDipilih
+  );
+
+
+  console.log(
+    "URL:",
+    url
+  );
+
+
+  /* =====================================================
+     KIRIM LEWAT IFRAME
+     
+     HALAMAN UTAMA TIDAK PINDAH
+  ===================================================== */
+
+  document
+    .getElementById("kirimFrame")
+    .src =
+      url;
+
+
+  /* -----------------------------------------------------
+     TUNGGU APPS SCRIPT MEMPROSES
+  ----------------------------------------------------- */
+
+  setTimeout(function() {
+
+    document
+      .getElementById("status")
+      .innerHTML =
+        '<span class="success">' +
+        '✓ DATA TERKIRIM KE SHEET' +
+        '</span>';
+
+
+    document
+      .getElementById("btnScan")
+      .style.display =
+        "inline-block";
+
+
+  }, 1500);
 
 }
 
@@ -527,32 +574,29 @@ function mulaiScanner() {
       "";
 
 
-  /* -----------------------------------------------
-     BUAT SCANNER
-  ------------------------------------------------ */
-
   scanner =
-    new Html5Qrcode("reader");
+    new Html5Qrcode(
+      "reader"
+    );
 
-
-  /* -----------------------------------------------
-     START CAMERA
-  ------------------------------------------------ */
 
   scanner
     .start(
 
       {
-        facingMode: "environment"
+        facingMode:
+          "environment"
       },
 
       {
+
         fps: 10,
 
         qrbox: {
           width: 280,
           height: 150
         }
+
       },
 
       berhasilScan,
@@ -651,4 +695,5 @@ window.onload = function() {
 
 
 </body>
+
 </html>
