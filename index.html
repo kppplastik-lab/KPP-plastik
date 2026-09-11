@@ -349,90 +349,27 @@ function berhasilScan(teks) {
     scanner.stop().catch(function(){});
   }
 
-  // ==========================================
-  // BUAT IFRAME TERSEMBUNYI
-  // ==========================================
-
-  let iframe = document.getElementById("kppPengirim");
-
-  if (!iframe) {
-
-    iframe = document.createElement("iframe");
-
-    iframe.id = "kppPengirim";
-
-    iframe.name = "kppPengirim";
-
-    iframe.style.position = "fixed";
-    iframe.style.width = "1px";
-    iframe.style.height = "1px";
-    iframe.style.left = "-10000px";
-    iframe.style.top = "-10000px";
-    iframe.style.border = "0";
-
-    document.body.appendChild(iframe);
-  }
-
-  // ==========================================
-  // BUAT FORM
-  // ==========================================
-
-  const form = document.createElement("form");
-
-  form.method = "GET";
-
-  form.action = WEB_APP_URL;
-
-  form.target = "kppPengirim";
-
-  form.style.display = "none";
-
-  // BARCODE
-  const inputBarcode = document.createElement("input");
-
-  inputBarcode.type = "hidden";
-  inputBarcode.name = "barcode";
-  inputBarcode.value = teks;
-
-  // JENIS
-  const inputJenis = document.createElement("input");
-
-  inputJenis.type = "hidden";
-  inputJenis.name = "jenis";
-  inputJenis.value = jenisDipilih;
-
-  // CACHE BUSTER
-  const inputTime = document.createElement("input");
-
-  inputTime.type = "hidden";
-  inputTime.name = "t";
-  inputTime.value = Date.now();
-
-  form.appendChild(inputBarcode);
-  form.appendChild(inputJenis);
-  form.appendChild(inputTime);
-
-  document.body.appendChild(form);
-
-  // ==========================================
-  // KIRIM OTOMATIS
-  // ==========================================
-
   console.log("BARCODE:", teks);
   console.log("JENIS:", jenisDipilih);
 
-  form.submit();
-
-  // Hapus form setelah dikirim
-  setTimeout(function() {
-    form.remove();
-  }, 3000);
-
   // ==========================================
-  // TAMPILKAN STATUS
+  // KIRIM KE APPS SCRIPT
   // ==========================================
 
-  setTimeout(function() {
+  const data = new URLSearchParams();
+
+  data.append("barcode", teks);
+  data.append("jenis", jenisDipilih);
+
+  fetch(WEB_APP_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: data,
+    cache: "no-store"
+  })
+  .then(function() {
+
+    console.log("Request berhasil dikirim");
 
     document.getElementById("status").innerHTML =
       '<span class="success">✓ DATA TERKIRIM KE ' +
@@ -442,7 +379,19 @@ function berhasilScan(teks) {
     document.getElementById("btnScan")
       .style.display = "inline-block";
 
-  }, 2000);
+  })
+  .catch(function(error) {
+
+    console.error("Gagal kirim:", error);
+
+    document.getElementById("status").innerHTML =
+      '<span class="error">✕ GAGAL MENGIRIM DATA</span>';
+
+    document.getElementById("btnScan")
+      .style.display = "inline-block";
+
+  });
+
 }
 
 /* ==========================================
