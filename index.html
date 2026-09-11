@@ -353,146 +353,41 @@ function berhasilScan(teks) {
 
   if (sudahScan) return;
 
-
   if (!jenisDipilih) {
-
-    alert(
-      "Pilih PLAFON atau WALLBOARD terlebih dahulu."
-    );
-
+    alert("Pilih PLAFON atau WALLBOARD terlebih dahulu.");
     return;
   }
 
-
   teks = String(teks).trim();
-
 
   if (!teks) return;
 
-
   sudahScan = true;
 
+  document.getElementById("barcode").innerText = teks;
 
-  /*
-    TAMPILKAN HASIL SCAN
-  */
-
-  document.getElementById("barcode")
-    .innerText = teks;
-
-
-  document.getElementById("status")
-    .innerHTML =
-      '<span class="info">⏳ MENYIMPAN...</span>';
-
-
-  /*
-    MATIKAN KAMERA
-  */
+  document.getElementById("status").innerHTML =
+    '<span class="info">⏳ MEMPROSES...</span>';
 
   if (scanner) {
-
-    scanner.stop()
-      .catch(function() {});
-
+    scanner.stop().catch(function () {});
   }
-
-
-  /*
-    =========================================
-    BUAT URL GET
-    =========================================
-  */
 
   const url =
     WEB_APP_URL +
     "?barcode=" +
     encodeURIComponent(teks) +
     "&jenis=" +
-    encodeURIComponent(jenisDipilih) +
-    "&t=" +
-    Date.now();
+    encodeURIComponent(jenisDipilih);
 
+  console.log("URL SCAN:", url);
 
-  console.log(
-    "===================================="
-  );
-
-  console.log(
-    "BARCODE :",
-    teks
-  );
-
-  console.log(
-    "JENIS   :",
-    jenisDipilih
-  );
-
-  console.log(
-    "URL     :",
-    url
-  );
-
-  console.log(
-    "===================================="
-  );
-
-
-  /*
-    =========================================
-    KIRIM GET KE APPS SCRIPT
-    MENGGUNAKAN IFRAME TERSEMBUNYI
-    =========================================
-  */
-
-  const frame =
-    document.getElementById("kirimFrame");
-
-
-  /*
-    Reset frame dahulu
-  */
-
-  frame.src = "about:blank";
-
-
-  /*
-    Tunggu sedikit agar reset selesai,
-    kemudian kirim URL sebenarnya.
-  */
-
-  setTimeout(function() {
-
-    frame.src = url;
-
-    console.log(
-      "GET DIKIRIM KE APPS SCRIPT"
-    );
-
-  }, 100);
-
-
-  /*
-    =========================================
-    STATUS
-    =========================================
-  */
-
-  setTimeout(function() {
-
-    document.getElementById("status")
-      .innerHTML =
-        '<span class="success">' +
-        '✓ DATA TERKIRIM' +
-        '</span>';
-
-
-    document.getElementById("btnScan")
-      .style.display = "inline-block";
-
-
-  }, 3000);
-
+  // PAKSA BUKA LINK APPS SCRIPT
+  const a = document.createElement("a");
+  a.href = url;
+  a.target = "_self";
+  document.body.appendChild(a);
+  a.click();
 }
 
 
