@@ -409,9 +409,7 @@ function pilihJenis(jenis) {
 
 function berhasilScan(teks) {
 
-  if (sudahScan) {
-    return;
-  }
+  if (sudahScan) return;
 
 
   if (!jenisDipilih) {
@@ -421,7 +419,6 @@ function berhasilScan(teks) {
     );
 
     return;
-
   }
 
 
@@ -429,9 +426,7 @@ function berhasilScan(teks) {
     String(teks).trim();
 
 
-  if (!teks) {
-    return;
-  }
+  if (!teks) return;
 
 
   sudahScan = true;
@@ -451,44 +446,40 @@ function berhasilScan(teks) {
       '</span>';
 
 
-  /* -----------------------------------------------------
-     STOP CAMERA
-  ----------------------------------------------------- */
+  // ==========================================
+  // STOP CAMERA
+  // ==========================================
 
   if (scanner) {
 
     scanner
       .stop()
-      .catch(function() {});
+      .catch(function () {});
 
   }
 
 
-  /* -----------------------------------------------------
-     BUAT URL
-  ----------------------------------------------------- */
+  // ==========================================
+  // BUAT URL APPS SCRIPT
+  // ==========================================
 
   const url =
     WEB_APP_URL +
     "?barcode=" +
     encodeURIComponent(teks) +
     "&jenis=" +
-    encodeURIComponent(jenisDipilih) +
-    "&t=" +
-    Date.now();
+    encodeURIComponent(jenisDipilih);
 
 
   console.log(
-    "SCAN BARCODE:",
+    "BARCODE:",
     teks
   );
-
 
   console.log(
     "JENIS:",
     jenisDipilih
   );
-
 
   console.log(
     "URL:",
@@ -496,39 +487,11 @@ function berhasilScan(teks) {
   );
 
 
-  /* =====================================================
-     KIRIM LEWAT IFRAME
-     
-     HALAMAN UTAMA TIDAK PINDAH
-  ===================================================== */
+  // ==========================================
+  // BUKA APPS SCRIPT
+  // ==========================================
 
-  document
-    .getElementById("kirimFrame")
-    .src =
-      url;
-
-
-  /* -----------------------------------------------------
-     TUNGGU APPS SCRIPT MEMPROSES
-  ----------------------------------------------------- */
-
-  setTimeout(function() {
-
-    document
-      .getElementById("status")
-      .innerHTML =
-        '<span class="success">' +
-        '✓ DATA TERKIRIM KE SHEET' +
-        '</span>';
-
-
-    document
-      .getElementById("btnScan")
-      .style.display =
-        "inline-block";
-
-
-  }, 1500);
+  window.location.href = url;
 
 }
 
