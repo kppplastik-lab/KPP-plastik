@@ -364,10 +364,7 @@ function pilihJenis(jenis) {
 
 function berhasilScan(teks) {
 
-  if (sudahScan) {
-    return;
-  }
-
+  if (sudahScan) return;
 
   if (!jenisDipilih) {
 
@@ -376,51 +373,43 @@ function berhasilScan(teks) {
     );
 
     return;
-
   }
 
+  teks = String(teks).trim();
 
-  teks =
-    String(teks).trim();
-
-
-  if (!teks) {
-    return;
-  }
+  if (!teks) return;
 
 
   sudahScan = true;
 
 
-  document
-    .getElementById("barcode")
+  document.getElementById("barcode")
     .innerText = teks;
 
 
-  document
-    .getElementById("status")
+  document.getElementById("status")
     .innerHTML =
       '<span class="info">' +
       '⏳ MENYIMPAN KE SHEET...' +
       '</span>';
 
 
-  /* -----------------------------------------------
-     MATIKAN KAMERA
-  ------------------------------------------------ */
+  /*
+   * MATIKAN KAMERA SEMENTARA
+   */
 
   if (scanner) {
 
     scanner
       .stop()
-      .catch(function() {});
+      .catch(function () {});
 
   }
 
 
-  /* -----------------------------------------------
-     BUAT URL
-  ------------------------------------------------ */
+  /*
+   * BUAT LINK APPS SCRIPT
+   */
 
   const url =
     WEB_APP_URL +
@@ -430,27 +419,69 @@ function berhasilScan(teks) {
     encodeURIComponent(jenisDipilih);
 
 
-  console.log(
-    "BARCODE:",
-    teks
-  );
-
-  console.log(
-    "JENIS:",
-    jenisDipilih
-  );
-
-  console.log(
-    "URL:",
-    url
-  );
+  console.log("================================");
+  console.log("BARCODE :", teks);
+  console.log("JENIS   :", jenisDipilih);
+  console.log("URL     :", url);
+  console.log("================================");
 
 
-  /* -----------------------------------------------
-     LANGSUNG KIRIM KE APPS SCRIPT
-  ------------------------------------------------ */
+  /*
+   * KIRIM KE APPS SCRIPT
+   * TANPA MENINGGALKAN HALAMAN SCANNER
+   */
 
-  window.location.href = url;
+  const img = new Image();
+
+  img.onload = function () {
+
+    console.log("REQUEST SELESAI");
+
+    document.getElementById("status")
+      .innerHTML =
+        '<span class="success">' +
+        '✓ DATA TERKIRIM KE SHEET' +
+        '</span>';
+
+    document.getElementById("btnScan")
+      .style.display = "inline-block";
+
+  };
+
+
+  img.onerror = function () {
+
+    /*
+     * Apps Script sering dianggap error
+     * oleh browser karena cross-origin,
+     * walaupun request GET sebenarnya sudah
+     * sampai ke server.
+     */
+
+    console.log("REQUEST SELESAI / CROSS ORIGIN");
+
+
+    document.getElementById("status")
+      .innerHTML =
+        '<span class="success">' +
+        '✓ DATA TERKIRIM KE SHEET' +
+        '</span>';
+
+
+    document.getElementById("btnScan")
+      .style.display = "inline-block";
+
+  };
+
+
+  /*
+   * INI YANG MENGIRIM REQUEST
+   */
+
+  img.src =
+    url +
+    "&t=" +
+    new Date().getTime();
 
 }
 
