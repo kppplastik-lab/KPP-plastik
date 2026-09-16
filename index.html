@@ -4,24 +4,110 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scan Warehouse</title>
+
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; padding: 12px; background: #031d2b; color: white; font-family: Arial, sans-serif; }
-    .container { width: 100%; max-width: 680px; margin: auto; }
-    h1 { text-align: center; color: #00aeef; font-size: 32px; margin: 15px 0 25px; }
-    .box { background: #073346; border: 3px solid #00a9e0; border-radius: 28px; padding: 25px; margin-bottom: 25px; }
-    label { display: block; margin-top: 18px; margin-bottom: 10px; font-size: 23px; font-weight: bold; }
-    input, select { width: 100%; padding: 18px; border: 3px solid #00a9e0; border-radius: 20px; background: #031d2b; color: white; font-size: 22px; outline: none; }
-    button { width: 100%; padding: 20px; margin-top: 18px; border: none; border-radius: 20px; color: white; font-size: 22px; font-weight: bold; cursor: pointer; }
+    body {
+      margin: 0;
+      padding: 12px;
+      background: #031d2b;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      width: 100%;
+      max-width: 680px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #00aeef;
+      font-size: 32px;
+      margin: 15px 0 25px;
+    }
+    .box {
+      background: #073346;
+      border: 3px solid #00a9e0;
+      border-radius: 28px;
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+    label {
+      display: block;
+      margin-top: 18px;
+      margin-bottom: 10px;
+      font-size: 23px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 18px;
+      border: 3px solid #00a9e0;
+      border-radius: 20px;
+      background: #031d2b;
+      color: white;
+      font-size: 22px;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: #00ffae; }
+    button {
+      width: 100%;
+      padding: 20px;
+      margin-top: 18px;
+      border: none;
+      border-radius: 20px;
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.6; cursor: wait; }
     .btn-scan { background: #00c875; }
     .btn-camera { background: #08a9df; }
     .btn-stop { background: #e53935; }
-    #reader { display: none; width: 100%; margin-top: 20px; padding: 8px; border-radius: 15px; background: white; overflow: hidden; }
-    .status { margin-top: 20px; padding: 18px; border-radius: 15px; border: 2px solid #00d084; background: #075d3e; color: white; font-size: 19px; line-height: 1.5; white-space: pre-line; }
+    #reader {
+      display: none;
+      width: 100%;
+      margin-top: 20px;
+      padding: 8px;
+      border-radius: 15px;
+      background: white;
+      overflow: hidden;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 15px;
+      border: 2px solid #00d084;
+      background: #075d3e;
+      color: white;
+      font-size: 19px;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
     .status.error { background: #641d27; border-color: #ff6675; }
     .status.warning { background: #614b08; border-color: #ffd43b; }
     .status.info { background: #0c4a60; border-color: #00a9e0; }
+
+    .history-title {
+      color: #00aeef;
+      font-size: 30px;
+      font-weight: bold;
+      line-height: 1.3;
+      margin-bottom: 20px;
+    }
+    .history-item {
+      background: #031d2b;
+      border: 1px solid #087da5;
+      border-radius: 14px;
+      padding: 15px;
+      margin-bottom: 12px;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+    .empty { color: #dddddd; font-size: 19px; }
   </style>
 </head>
 <body>
@@ -46,20 +132,39 @@
       <label for="barcode">Barcode</label>
       <input type="text" id="barcode" placeholder="Scan atau ketik barcode" autocomplete="off">
 
-      <button type="button" id="btnKirim" class="btn-scan" onclick="kirimScan()">SCAN BARCODE</button>
-      <button type="button" class="btn-camera" onclick="bukaScanner()">FOKUS SCANNER</button>
-      <button type="button" id="btnStop" class="btn-stop" onclick="tutupScanner()" style="display: none;">TUTUP SCANNER</button>
+      <button type="button" id="btnKirim" class="btn-scan" onclick="kirimScan()">
+        SCAN BARCODE
+      </button>
+
+      <button type="button" class="btn-camera" onclick="bukaScanner()">
+        FOKUS SCANNER
+      </button>
+
+      <button type="button" id="btnStop" class="btn-stop" onclick="tutupScanner()" style="display: none;">
+        TUTUP SCANNER
+      </button>
 
       <div id="reader"></div>
-      <div id="status" class="status">Siap melakukan scan barcode.</div>
+
+      <div id="status" class="status">
+        Siap melakukan scan barcode.
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="history-title">RIWAYAT SCAN SEMENTARA</div>
+      <div id="history">
+        <div class="empty">Belum ada scan.</div>
+      </div>
     </div>
   </div>
 
   <script>
-    const URL_WEB_APP = "https://script.google.com/macros/s/AKfycby2S2oO_tmWABXU_7OkMFQub1YGtDoFDWgVJJ9IODFd2Nd-BWDSu76ttxkedCG9a9il1w/exec";
+    const URL_WEB_APP = "https://script.google.com/macros/s/AKfycbzXhd0otNyi-dhif6Dp72_lw_6jgOBX4O6T4rTfDlDG7x5JKYcM05ZbChXbxlIPZ9C8DA/exec";
 
     let scanner = null;
     let sedangScan = false;
+    let riwayat = [];
 
     function tampilkanStatus(pesan, tipe = "") {
       const status = document.getElementById("status");
@@ -84,11 +189,9 @@
       tampilkanStatus("Mengirim barcode (" + barcodeVal + ")...", "info");
       btnKirim.disabled = true;
 
-      // Bersihkan script JSONP lama
       const scriptLama = document.getElementById("jsonpScript");
       if (scriptLama) scriptLama.remove();
 
-      // Susun URL dengan membawa 'barcode' dan 'kode' bersamaan
       const url = URL_WEB_APP +
         "?barcode=" + encodeURIComponent(barcodeVal) +
         "&kode=" + encodeURIComponent(barcodeVal) +
@@ -101,6 +204,7 @@
       const script = document.createElement("script");
       script.id = "jsonpScript";
       script.src = url;
+
       script.onerror = function() {
         btnKirim.disabled = false;
         tampilkanStatus("Gagal terhubung ke Apps Script.", "error");
@@ -119,12 +223,61 @@
           "Sisa Stok di Sheet: " + data.stokSesudah,
           ""
         );
+
+        tambahRiwayat({
+          barcode: document.getElementById("barcode").value,
+          namaBarang: data.namaBarang,
+          admin: document.getElementById("admin").value || "ADMIN",
+          jumlah: document.getElementById("jumlah").value
+        });
+
         document.getElementById("barcode").value = "";
         document.getElementById("barcode").focus();
       } else {
         tampilkanStatus(data.message || "Gagal memproses barcode.", "error");
       }
     };
+
+    function tambahRiwayat(data) {
+      riwayat.unshift({
+        waktu: new Date().toLocaleTimeString("id-ID"),
+        barcode: data.barcode || "-",
+        namaBarang: data.namaBarang || "-",
+        admin: data.admin || "-",
+        jumlah: data.jumlah || 1
+      });
+
+      if (riwayat.length > 20) riwayat = riwayat.slice(0, 20);
+      tampilkanRiwayat();
+    }
+
+    function tampilkanRiwayat() {
+      const history = document.getElementById("history");
+      if (riwayat.length === 0) {
+        history.innerHTML = '<div class="empty">Belum ada scan.</div>';
+        return;
+      }
+
+      history.innerHTML = riwayat.map(function (item) {
+        return `
+          <div class="history-item">
+            <b>Waktu:</b> ${aman(item.waktu)}<br>
+            <b>Barcode:</b> ${aman(item.barcode)}<br>
+            <b>Barang:</b> ${aman(item.namaBarang)}<br>
+            <b>Admin:</b> ${aman(item.admin)} | <b>Qty:</b> ${aman(item.jumlah)}
+          </div>
+        `;
+      }).join("");
+    }
+
+    function aman(nilai) {
+      return String(nilai)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
 
     function bukaScanner() {
       const reader = document.getElementById("reader");
