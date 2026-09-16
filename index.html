@@ -1,662 +1,174 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="id">
 <head>
-
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1">
-
-  <title>KPP Scanner</title>
-
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scan Warehouse</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
-
-    * {
-      box-sizing: border-box;
-    }
-
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f1f3f4;
-    }
-
-
-    .header {
-      background: #263238;
-      color: white;
-      text-align: center;
-      padding: 18px;
-      font-size: 23px;
-      font-weight: bold;
-    }
-
-
-    .container {
-      width: 94%;
-      max-width: 500px;
-      margin: 20px auto;
-    }
-
-
-    .pilih {
-      background: white;
-      border-radius: 16px;
-      padding: 15px;
-      box-shadow: 0 3px 12px rgba(0,0,0,.12);
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-
-    .judul {
-      font-size: 15px;
-      color: #777;
-      margin-bottom: 12px;
-      font-weight: bold;
-    }
-
-
-    .jenis-btn {
-      width: 48%;
-      padding: 14px 5px;
-      border: 2px solid #263238;
-      border-radius: 10px;
-      background: white;
-      color: #263238;
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-
-    .jenis-btn.aktif {
-      background: #263238;
-      color: white;
-    }
-
-
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 15px;
-      box-shadow: 0 3px 12px rgba(0,0,0,.12);
-    }
-
-
-    #reader {
-      width: 100%;
-    }
-
-
-    .hasil {
-      margin-top: 18px;
-      text-align: center;
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 3px 12px rgba(0,0,0,.12);
-    }
-
-
-    .label {
-      font-size: 14px;
-      color: #777;
-    }
-
-
-    #jenisTerpilih {
-      margin-top: 5px;
-      font-size: 15px;
-      font-weight: bold;
-      color: #263238;
-    }
-
-
-    #barcode {
-      margin-top: 8px;
-      font-size: 28px;
-      font-weight: bold;
-      word-break: break-all;
-    }
-
-
-    #status {
-      margin-top: 10px;
-      font-size: 16px;
-    }
-
-
-    .success {
-      color: #168a3a;
-      font-weight: bold;
-    }
-
-
-    .error {
-      color: #d32f2f;
-      font-weight: bold;
-    }
-
-
-    .info {
-      color: #555;
-    }
-
-
-    #btnScan {
-      margin-top: 15px;
-      padding: 12px 25px;
-      border: none;
-      border-radius: 10px;
-      background: #263238;
-      color: white;
-      font-size: 16px;
-    }
-
-
-    /* ==========================================
-       IFRAME TERSEMBUNYI
-    ========================================== */
-
-    #kirimFrame {
-
-      position: fixed;
-
-      left: -9999px;
-
-      top: -9999px;
-
-      width: 1px;
-
-      height: 1px;
-
-      border: 0;
-
-      opacity: 0;
-
-    }
-
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 12px; background: #031d2b; color: white; font-family: Arial, sans-serif; }
+    .container { width: 100%; max-width: 680px; margin: auto; }
+    h1 { text-align: center; color: #00aeef; font-size: 32px; margin: 15px 0 25px; }
+    .box { background: #073346; border: 3px solid #00a9e0; border-radius: 28px; padding: 25px; margin-bottom: 25px; }
+    label { display: block; margin-top: 18px; margin-bottom: 10px; font-size: 23px; font-weight: bold; }
+    input, select { width: 100%; padding: 18px; border: 3px solid #00a9e0; border-radius: 20px; background: #031d2b; color: white; font-size: 22px; outline: none; }
+    button { width: 100%; padding: 20px; margin-top: 18px; border: none; border-radius: 20px; color: white; font-size: 22px; font-weight: bold; cursor: pointer; }
+    .btn-scan { background: #00c875; }
+    .btn-camera { background: #08a9df; }
+    .btn-stop { background: #e53935; }
+    #reader { display: none; width: 100%; margin-top: 20px; padding: 8px; border-radius: 15px; background: white; overflow: hidden; }
+    .status { margin-top: 20px; padding: 18px; border-radius: 15px; border: 2px solid #00d084; background: #075d3e; color: white; font-size: 19px; line-height: 1.5; white-space: pre-line; }
+    .status.error { background: #641d27; border-color: #ff6675; }
+    .status.warning { background: #614b08; border-color: #ffd43b; }
+    .status.info { background: #0c4a60; border-color: #00a9e0; }
   </style>
-
 </head>
-
-
 <body>
 
+  <div class="container">
+    <h1>SCAN WAREHOUSE</h1>
 
-<div class="header">
-  KPP SCANNER
-</div>
+    <div class="box">
+      <label for="jenis">Jenis Barang</label>
+      <select id="jenis">
+        <option value="MATERIAL">MATERIAL</option>
+        <option value="ALAT">ALAT</option>
+        <option value="MOTIF">MOTIF</option>
+      </select>
 
+      <label for="admin">Nama Admin</label>
+      <input type="text" id="admin" value="Adm">
 
-<div class="container">
+      <label for="jumlah">Jumlah</label>
+      <input type="number" id="jumlah" value="1" min="1">
 
+      <label for="barcode">Barcode</label>
+      <input type="text" id="barcode" placeholder="Scan atau ketik barcode" autocomplete="off">
 
-  <!-- PILIH JENIS -->
+      <button type="button" id="btnKirim" class="btn-scan" onclick="kirimScan()">SCAN BARCODE</button>
+      <button type="button" class="btn-camera" onclick="bukaScanner()">FOKUS SCANNER</button>
+      <button type="button" id="btnStop" class="btn-stop" onclick="tutupScanner()" style="display: none;">TUTUP SCANNER</button>
 
-  <div class="pilih">
-
-    <div class="judul">
-      PILIH JENIS PRODUK
+      <div id="reader"></div>
+      <div id="status" class="status">Siap melakukan scan barcode.</div>
     </div>
-
-
-    <button
-      class="jenis-btn"
-      id="btnPlafon"
-      onclick="pilihJenis('PLAFON')">
-
-      PLAFON
-
-    </button>
-
-
-    <button
-      class="jenis-btn"
-      id="btnWallboard"
-      onclick="pilihJenis('WALLBOARD')">
-
-      WALLBOARD
-
-    </button>
-
   </div>
 
-
-  <!-- CAMERA -->
-
-  <div class="card">
-
-    <div id="reader"></div>
-
-  </div>
-
-
-  <!-- HASIL -->
-
-  <div class="hasil">
-
-    <div class="label">
-      HASIL SCAN
-    </div>
-
-
-    <div id="jenisTerpilih">
-      Pilih PLAFON atau WALLBOARD
-    </div>
-
-
-    <div id="barcode">
-      Belum ada
-    </div>
-
-
-    <div id="status">
-      Pilih jenis produk terlebih dahulu
-    </div>
-
-
-    <button
-      onclick="scanLagi()"
-      id="btnScan"
-      style="display:none;">
-
-      SCAN LAGI
-
-    </button>
-
-  </div>
-
-</div>
-
-
-<!-- ==========================================
-     IFRAME PENGIRIM
-========================================== -->
-
-<iframe
-  id="kirimFrame"
-  name="kirimFrame">
-</iframe>
-
-
-
-<script>
-
-
-/* =====================================================
-   APPS SCRIPT
-===================================================== */
-
-const WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycby2S2oO_tmWABXU_7OkMFQub1YGtDoFDWgVJJ9IODFd2Nd-BWDSu76ttxkedCG9a9il1w/exec";
-
-
-/* =====================================================
-   VARIABLE
-===================================================== */
-
-let sudahScan = false;
-
-let scanner = null;
-
-let jenisDipilih = "";
-
-
-/* =====================================================
-   PILIH JENIS
-===================================================== */
-
-function pilihJenis(jenis) {
-
-  jenisDipilih = jenis;
-
-  sudahScan = false;
-
-
-  document
-    .getElementById("btnPlafon")
-    .classList.remove("aktif");
-
-
-  document
-    .getElementById("btnWallboard")
-    .classList.remove("aktif");
-
-
-  if (jenis === "PLAFON") {
-
-    document
-      .getElementById("btnPlafon")
-      .classList.add("aktif");
-
-  }
-
-
-  if (jenis === "WALLBOARD") {
-
-    document
-      .getElementById("btnWallboard")
-      .classList.add("aktif");
-
-  }
-
-
-  document
-    .getElementById("jenisTerpilih")
-    .innerText =
-      "JENIS: " + jenis;
-
-
-  document
-    .getElementById("status")
-    .innerHTML =
-      '<span class="info">' +
-      'Arahkan kamera ke barcode ' +
-      jenis +
-      '</span>';
-
-
-  document
-    .getElementById("btnScan")
-    .style.display =
-      "none";
-
-
-  if (scanner) {
-
-    scanner
-      .stop()
-
-      .then(function() {
-
-        document
-          .getElementById("reader")
-          .innerHTML = "";
-
-        mulaiScanner();
-
-      })
-
-      .catch(function() {
-
-        document
-          .getElementById("reader")
-          .innerHTML = "";
-
-        mulaiScanner();
-
-      });
-
-  } else {
-
-    mulaiScanner();
-
-  }
-
-}
-
-
-/* =====================================================
-   BARCODE BERHASIL DIBACA
-===================================================== */
-
-function berhasilScan(teks) {
-
-  if (sudahScan) return;
-
-
-  if (!jenisDipilih) {
-
-    alert(
-      "Pilih PLAFON atau WALLBOARD terlebih dahulu."
-    );
-
-    return;
-  }
-
-
-  teks =
-    String(teks).trim();
-
-
-  if (!teks) return;
-
-
-  sudahScan = true;
-
-
-  document
-    .getElementById("barcode")
-    .innerText =
-      teks;
-
-
-  document
-    .getElementById("status")
-    .innerHTML =
-      '<span class="info">' +
-      '⏳ MENYIMPAN KE SHEET...' +
-      '</span>';
-
-
-  // ==========================================
-  // STOP CAMERA
-  // ==========================================
-
-  if (scanner) {
-
-    scanner
-      .stop()
-      .catch(function () {});
-
-  }
-
-
-  // ==========================================
-  // BUAT URL APPS SCRIPT
-  // ==========================================
-
-  const url =
-    WEB_APP_URL +
-    "?barcode=" +
-    encodeURIComponent(teks) +
-    "&jenis=" +
-    encodeURIComponent(jenisDipilih);
-
-
-  console.log(
-    "BARCODE:",
-    teks
-  );
-
-  console.log(
-    "JENIS:",
-    jenisDipilih
-  );
-
-  console.log(
-    "URL:",
-    url
-  );
-
-
-  // ==========================================
-  // BUKA APPS SCRIPT
-  // ==========================================
-
-  window.location.href = url;
-
-}
-
-
-/* =====================================================
-   MULAI SCANNER
-===================================================== */
-
-function mulaiScanner() {
-
-  if (!jenisDipilih) {
-    return;
-  }
-
-
-  sudahScan = false;
-
-
-  document
-    .getElementById("barcode")
-    .innerText =
-      "Belum ada";
-
-
-  document
-    .getElementById("status")
-    .innerHTML =
-      '<span class="info">' +
-      'Arahkan kamera ke barcode ' +
-      jenisDipilih +
-      '</span>';
-
-
-  document
-    .getElementById("btnScan")
-    .style.display =
-      "none";
-
-
-  document
-    .getElementById("reader")
-    .innerHTML =
-      "";
-
-
-  scanner =
-    new Html5Qrcode(
-      "reader"
-    );
-
-
-  scanner
-    .start(
-
-      {
-        facingMode:
-          "environment"
-      },
-
-      {
-
-        fps: 10,
-
-        qrbox: {
-          width: 280,
-          height: 150
-        }
-
-      },
-
-      berhasilScan,
-
-      function(errorMessage) {
-
-        // ERROR SCAN SEMENTARA DIABAIKAN
-
+  <script>
+    const URL_WEB_APP = "https://script.google.com/macros/s/AKfycby2S2oO_tmWABXU_7OkMFQub1YGtDoFDWgVJJ9IODFd2Nd-BWDSu76ttxkedCG9a9il1w/exec";
+
+    let scanner = null;
+    let sedangScan = false;
+
+    function tampilkanStatus(pesan, tipe = "") {
+      const status = document.getElementById("status");
+      status.textContent = pesan;
+      status.className = "status";
+      if (tipe) status.classList.add(tipe);
+    }
+
+    function kirimScan() {
+      const inputEl = document.getElementById("barcode");
+      const barcodeVal = inputEl ? inputEl.value.trim() : "";
+      const adminVal = document.getElementById("admin").value.trim() || "ADMIN";
+      const jenisVal = document.getElementById("jenis").value;
+      const jumlahVal = document.getElementById("jumlah").value || 1;
+      const btnKirim = document.getElementById("btnKirim");
+
+      if (!barcodeVal) {
+        tampilkanStatus("Kode barcode belum diisi!", "warning");
+        return;
       }
 
-    )
+      tampilkanStatus("Mengirim barcode (" + barcodeVal + ")...", "info");
+      btnKirim.disabled = true;
 
-    .catch(function(error) {
+      // Bersihkan script JSONP lama
+      const scriptLama = document.getElementById("jsonpScript");
+      if (scriptLama) scriptLama.remove();
 
-      document
-        .getElementById("status")
-        .innerHTML =
-          '<span class="error">' +
-          'Kamera gagal dibuka: ' +
-          error +
-          '</span>';
+      // Susun URL dengan membawa 'barcode' dan 'kode' bersamaan
+      const url = URL_WEB_APP +
+        "?barcode=" + encodeURIComponent(barcodeVal) +
+        "&kode=" + encodeURIComponent(barcodeVal) +
+        "&admin=" + encodeURIComponent(adminVal) +
+        "&jenis=" + encodeURIComponent(jenisVal) +
+        "&jumlah=" + encodeURIComponent(jumlahVal) +
+        "&callback=responDiterima" +
+        "&t=" + Date.now();
 
+      const script = document.createElement("script");
+      script.id = "jsonpScript";
+      script.src = url;
+      script.onerror = function() {
+        btnKirim.disabled = false;
+        tampilkanStatus("Gagal terhubung ke Apps Script.", "error");
+      };
+
+      document.body.appendChild(script);
+    }
+
+    window.responDiterima = function(data) {
+      document.getElementById("btnKirim").disabled = false;
+
+      if (data && data.status === "OK") {
+        tampilkanStatus(
+          "SCAN BERHASIL!\n" +
+          "Barang: " + data.namaBarang + "\n" +
+          "Sisa Stok di Sheet: " + data.stokSesudah,
+          ""
+        );
+        document.getElementById("barcode").value = "";
+        document.getElementById("barcode").focus();
+      } else {
+        tampilkanStatus(data.message || "Gagal memproses barcode.", "error");
+      }
+    };
+
+    function bukaScanner() {
+      const reader = document.getElementById("reader");
+      const btnStop = document.getElementById("btnStop");
+      if (sedangScan) return;
+
+      reader.style.display = "block";
+      btnStop.style.display = "block";
+      scanner = new Html5Qrcode("reader");
+      sedangScan = true;
+
+      scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 150 } },
+        function (hasilBarcode) {
+          document.getElementById("barcode").value = hasilBarcode;
+          tutupScanner();
+          kirimScan();
+        },
+        function () {}
+      ).catch(function (err) {
+        sedangScan = false;
+        reader.style.display = "none";
+        btnStop.style.display = "none";
+        tampilkanStatus("Kamera error: " + err, "error");
+      });
+    }
+
+    function tutupScanner() {
+      if (scanner && sedangScan) {
+        scanner.stop().then(() => scanner.clear()).catch(() => {});
+      }
+      scanner = null;
+      sedangScan = false;
+      document.getElementById("reader").style.display = "none";
+      document.getElementById("btnStop").style.display = "none";
+    }
+
+    document.getElementById("barcode").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        kirimScan();
+      }
     });
-
-}
-
-
-/* =====================================================
-   SCAN LAGI
-===================================================== */
-
-function scanLagi() {
-
-  if (scanner) {
-
-    scanner
-      .stop()
-      .catch(function() {});
-
-  }
-
-
-  document
-    .getElementById("reader")
-    .innerHTML =
-      "";
-
-
-  document
-    .getElementById("barcode")
-    .innerText =
-      "Belum ada";
-
-
-  document
-    .getElementById("status")
-    .innerHTML =
-      '<span class="info">' +
-      'Arahkan kamera ke barcode ' +
-      jenisDipilih +
-      '</span>';
-
-
-  document
-    .getElementById("btnScan")
-    .style.display =
-      "none";
-
-
-  sudahScan = false;
-
-
-  setTimeout(function() {
-
-    mulaiScanner();
-
-  }, 300);
-
-}
-
-
-/* =====================================================
-   HALAMAN DIBUKA
-===================================================== */
-
-window.onload = function() {
-
-  document
-    .getElementById("status")
-    .innerText =
-      "Pilih PLAFON atau WALLBOARD";
-
-};
-
-</script>
-
-
+  </script>
 </body>
-
 </html>
