@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>KPP Scanner</title>
+  <title>KPP Scanner Produksi</title>
 
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
@@ -16,228 +16,643 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f1f3f4;
+      background: #061f2c;
+      color: white;
     }
 
     .header {
-      background: #263238;
-      color: white;
+      background: #062b3a;
+      color: #00bfff;
       text-align: center;
-      padding: 18px;
-      font-size: 23px;
+      padding: 22px 15px;
+      font-size: 25px;
       font-weight: bold;
+      letter-spacing: .5px;
     }
 
     .container {
       width: 94%;
-      max-width: 500px;
-      margin: 20px auto;
+      max-width: 540px;
+      margin: 22px auto;
     }
 
     .card {
-      background: white;
-      border-radius: 16px;
-      padding: 15px;
-      box-shadow: 0 3px 12px rgba(0,0,0,.12);
+      background: #073244;
+      border: 2px solid #00bfff;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, .25);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 14px;
+      border: 2px solid #00bfff;
+      border-radius: 14px;
+      background: #062b3a;
+      color: white;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #00eaff;
+      box-shadow: 0 0 8px rgba(0, 191, 255, .4);
+    }
+
+    select option {
+      background: #062b3a;
+      color: white;
     }
 
     #reader {
       width: 100%;
+      margin-top: 18px;
+      overflow: hidden;
+      border-radius: 14px;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    button {
+      flex: 1;
+      min-width: 140px;
+      padding: 14px 18px;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-scan {
+      background: #00c878;
+    }
+
+    .btn-focus {
+      background: #08a9df;
+    }
+
+    .btn-reset {
+      background: #e53935;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
     }
 
     .hasil {
-      margin-top: 18px;
-      text-align: center;
-      background: white;
-      border-radius: 16px;
+      margin-top: 20px;
+      background: #073244;
+      border: 2px solid #00bfff;
+      border-radius: 20px;
       padding: 20px;
-      box-shadow: 0 3px 12px rgba(0,0,0,.12);
+      text-align: center;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, .25);
     }
 
     .label {
+      color: #a9c4ce;
       font-size: 14px;
-      color: #777;
+      margin-bottom: 8px;
     }
 
     #barcode {
-      margin-top: 8px;
-      font-size: 28px;
+      color: #00eaff;
+      font-size: 25px;
       font-weight: bold;
       word-break: break-all;
     }
 
     #status {
-      margin-top: 10px;
+      margin-top: 12px;
       font-size: 16px;
+      line-height: 1.5;
     }
 
     .success {
-      color: #168a3a;
+      color: #00e676;
       font-weight: bold;
     }
 
     .error {
-      color: #d32f2f;
+      color: #ff5252;
       font-weight: bold;
     }
 
-    button {
+    .warning {
+      color: #ffca28;
+      font-weight: bold;
+    }
+
+    .info-box {
       margin-top: 15px;
-      padding: 12px 25px;
-      border: none;
+      padding: 12px;
       border-radius: 10px;
-      background: #263238;
-      color: white;
-      font-size: 16px;
+      background: #062b3a;
+      color: #b8d5df;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 420px) {
+      .header {
+        font-size: 21px;
+      }
+
+      .card,
+      .hasil {
+        padding: 15px;
+      }
+
+      button {
+        min-width: 100%;
+      }
     }
   </style>
 </head>
 
 <body>
 
-<div class="header">
-  KPP SCANNER
-</div>
-
-<div class="container">
-
-  <div class="card">
-    <div id="reader"></div>
+  <div class="header">
+    KPP SCANNER PRODUKSI
   </div>
 
-  <div class="hasil">
+  <div class="container">
 
-    <div class="label">
-      HASIL SCAN
+    <div class="card">
+
+      <div class="form-group">
+        <label for="admin">Nama Admin</label>
+
+        <input
+          type="text"
+          id="admin"
+          placeholder="Ketik nama admin"
+          autocomplete="off"
+          required
+        >
+      </div>
+
+
+      <div class="form-group">
+        <label for="jenis">Jenis Barang</label>
+
+        <select id="jenis" required>
+          <option value="PLAFON">PLAFON</option>
+          <option value="WALLBOARD">WALLBOARD</option>
+        </select>
+      </div>
+
+
+      <div class="form-group">
+        <label for="mesin">Pilih Mesin</label>
+
+        <select id="mesin" required>
+          <option value="MESIN1">MESIN1</option>
+          <option value="MESIN2">MESIN2</option>
+          <option value="MESIN4">MESIN4</option>
+          <option value="MESIN5">MESIN5</option>
+          <option value="MESIN6">MESIN6</option>
+          <option value="MESIN7">MESIN7</option>
+          <option value="MESIN8">MESIN8</option>
+          <option value="MESIN9">MESIN9</option>
+          <option value="MESIN10">MESIN10</option>
+        </select>
+      </div>
+
+
+      <div class="form-group">
+        <label for="barcodeInput">Barcode Manual</label>
+
+        <input
+          type="text"
+          id="barcodeInput"
+          placeholder="Scan atau ketik barcode"
+          autocomplete="off"
+        >
+      </div>
+
+
+      <div id="reader"></div>
+
+
+      <div class="button-group">
+        <button
+          type="button"
+          class="btn-scan"
+          id="btnScan"
+          onclick="mulaiScanner()"
+        >
+          SCAN BARCODE
+        </button>
+
+        <button
+          type="button"
+          class="btn-focus"
+          onclick="fokusScanner()"
+        >
+          FOKUS SCANNER
+        </button>
+
+        <button
+          type="button"
+          class="btn-reset"
+          onclick="resetForm()"
+        >
+          RESET
+        </button>
+      </div>
+
+
+      <div class="info-box">
+        Barcode akan disimpan ke sheet mesin yang dipilih.
+        Nama admin diketik secara manual.
+      </div>
+
     </div>
 
-    <div id="barcode">
-      Belum ada
-    </div>
 
-    <div id="status">
-      Arahkan kamera ke barcode
-    </div>
+    <div class="hasil">
 
-    <button onclick="scanLagi()" id="btnScan" style="display:none;">
-      SCAN LAGI
-    </button>
+      <div class="label">
+        HASIL SCAN
+      </div>
+
+      <div id="barcode">
+        Belum ada
+      </div>
+
+      <div id="status">
+        Isi nama admin, pilih jenis barang dan mesin.
+      </div>
+
+    </div>
 
   </div>
 
-</div>
 
-<script>
+  <script>
 
-const WEB_APP_URL =
-"https://script.google.com/macros/s/AKfycbzECB01rtS4M5hupiKlyGtexXYIAmGxLA54uG17zKcFlLSPYnhdROIDzVOp1kqoaFXb/exec";
-
-let sudahScan = false;
-let scanner = null;
+    const WEB_APP_URL =
+      "https://script.google.com/macros/s/AKfycbzECB01rtS4M5hupiKlyGtexXYIAmGxLA54uG17zKcFlLSPYnhdROIDzVOp1kqoaFXb/exec";
 
 
-function berhasilScan(teks) {
-
-  if (sudahScan) return;
-
-  sudahScan = true;
-
-  document.getElementById("barcode").innerText = teks;
-
-  document.getElementById("status").innerHTML =
-    '<span>⏳ Menyimpan ke HASIL PRODUKSI...</span>';
-
-  scanner.stop().catch(function() {});
+    let scanner = null;
+    let sudahScan = false;
+    let scannerAktif = false;
 
 
-  // Kirim barcode ke Apps Script
-  const kirim = new Image();
+    function getFormData() {
 
-  kirim.onload = function() {
+      const admin =
+        document.getElementById("admin")
+          .value
+          .trim();
 
-    document.getElementById("status").innerHTML =
-      '<span class="success">✓ DATA TERSIMPAN</span>';
+      const jenis =
+        document.getElementById("jenis")
+          .value
+          .trim()
+          .toUpperCase();
 
-    document.getElementById("btnScan").style.display = "inline-block";
+      const mesin =
+        document.getElementById("mesin")
+          .value
+          .trim()
+          .toUpperCase();
 
-  };
-
-  kirim.onerror = function() {
-
-    // Request tetap bisa sudah diterima Google.
-    // Kita tetap tampilkan status selesai.
-    document.getElementById("status").innerHTML =
-      '<span class="success">✓ SCAN TERKIRIM</span>';
-
-    document.getElementById("btnScan").style.display = "inline-block";
-
-  };
-
-  kirim.src =
-    WEB_APP_URL +
-    "?barcode=" +
-    encodeURIComponent(teks) +
-    "&t=" +
-    Date.now();
-}
-
-
-function mulaiScanner() {
-
-  sudahScan = false;
-
-  document.getElementById("barcode").innerText =
-    "Belum ada";
-
-  document.getElementById("status").innerText =
-    "Arahkan kamera ke barcode";
-
-  document.getElementById("btnScan").style.display =
-    "none";
-
-  scanner = new Html5Qrcode("reader");
-
-  scanner.start(
-    { facingMode: "environment" },
-
-    {
-      fps: 10,
-      qrbox: {
-        width: 280,
-        height: 150
-      }
-    },
-
-    berhasilScan,
-
-    function(errorMessage) {
-      // abaikan error scan sementara
+      return {
+        admin: admin,
+        jenis: jenis,
+        mesin: mesin
+      };
     }
 
-  ).catch(function(error) {
 
-    document.getElementById("status").innerHTML =
-      '<span class="error">Kamera gagal dibuka: ' +
-      error +
-      '</span>';
+    function validasiForm() {
 
-  });
-}
+      const data = getFormData();
+
+      if (!data.admin) {
+        tampilStatus(
+          "Nama admin wajib diisi.",
+          "error"
+        );
+
+        document.getElementById("admin").focus();
+
+        return false;
+      }
+
+      if (!data.jenis) {
+        tampilStatus(
+          "Jenis barang wajib dipilih.",
+          "error"
+        );
+
+        return false;
+      }
+
+      if (!data.mesin) {
+        tampilStatus(
+          "Mesin wajib dipilih.",
+          "error"
+        );
+
+        return false;
+      }
+
+      return true;
+    }
 
 
-function scanLagi() {
+    function tampilStatus(teks, kelas) {
 
-  document.getElementById("reader").innerHTML = "";
+      const status =
+        document.getElementById("status");
 
-  mulaiScanner();
-}
+      status.className = kelas || "";
+      status.innerHTML = teks;
+    }
 
 
-window.onload = function() {
-  mulaiScanner();
-};
+    function tampilBarcode(teks) {
 
-</script>
+      document.getElementById("barcode")
+        .innerText = teks;
+    }
+
+
+    function berhasilScan(teks) {
+
+      if (sudahScan) {
+        return;
+      }
+
+      if (!validasiForm()) {
+        return;
+      }
+
+      sudahScan = true;
+
+      teks = String(teks || "")
+        .trim()
+        .toUpperCase();
+
+      document.getElementById("barcodeInput")
+        .value = teks;
+
+      tampilBarcode(teks);
+
+      const data = getFormData();
+
+      tampilStatus(
+        "Menyimpan ke " +
+        data.mesin +
+        "...",
+        "warning"
+      );
+
+      hentikanScanner();
+
+
+      /*
+       * Kirim data ke Apps Script.
+       *
+       * Parameter:
+       * barcode
+       * jenis
+       * mesin
+       * admin
+       */
+
+      const kirim = new Image();
+
+      kirim.onload = function() {
+
+        tampilStatus(
+          "✓ DATA TERKIRIM KE " +
+          data.mesin,
+          "success"
+        );
+
+      };
+
+      kirim.onerror = function() {
+
+        /*
+         * Google Apps Script sering melakukan redirect.
+         * Karena itu error gambar tidak selalu berarti
+         * data gagal diterima.
+         */
+
+        tampilStatus(
+          "✓ SCAN TERKIRIM KE " +
+          data.mesin,
+          "success"
+        );
+
+      };
+
+
+      const url =
+        WEB_APP_URL +
+        "?barcode=" +
+        encodeURIComponent(teks) +
+        "&jenis=" +
+        encodeURIComponent(data.jenis) +
+        "&mesin=" +
+        encodeURIComponent(data.mesin) +
+        "&admin=" +
+        encodeURIComponent(data.admin) +
+        "&t=" +
+        Date.now();
+
+      kirim.src = url;
+    }
+
+
+    function mulaiScanner() {
+
+      if (!validasiForm()) {
+        return;
+      }
+
+      if (scannerAktif) {
+        return;
+      }
+
+      sudahScan = false;
+      scannerAktif = true;
+
+      tampilBarcode("Belum ada");
+
+      tampilStatus(
+        "Arahkan kamera ke barcode.",
+        ""
+      );
+
+      document.getElementById("btnScan")
+        .disabled = true;
+
+
+      scanner = new Html5Qrcode("reader");
+
+
+      scanner.start(
+
+        {
+          facingMode: "environment"
+        },
+
+        {
+          fps: 10,
+          qrbox: {
+            width: 280,
+            height: 150
+          }
+        },
+
+        berhasilScan,
+
+        function(errorMessage) {
+          // Error pembacaan sementara diabaikan.
+        }
+
+      ).catch(function(error) {
+
+        scannerAktif = false;
+
+        document.getElementById("btnScan")
+          .disabled = false;
+
+        tampilStatus(
+          "Kamera gagal dibuka: " +
+          error,
+          "error"
+        );
+
+      });
+    }
+
+
+    function hentikanScanner() {
+
+      if (
+        scanner &&
+        scannerAktif
+      ) {
+
+        scanner.stop()
+          .then(function() {
+            scannerAktif = false;
+          })
+          .catch(function() {
+            scannerAktif = false;
+          });
+
+      } else {
+
+        scannerAktif = false;
+
+      }
+
+      document.getElementById("btnScan")
+        .disabled = false;
+    }
+
+
+    function fokusScanner() {
+
+      const barcodeInput =
+        document.getElementById("barcodeInput");
+
+      barcodeInput.focus();
+      barcodeInput.select();
+
+      tampilStatus(
+        "Silakan scan barcode atau ketik barcode lalu tekan Enter.",
+        ""
+      );
+    }
+
+
+    function resetForm() {
+
+      hentikanScanner();
+
+      sudahScan = false;
+
+      document.getElementById("barcodeInput")
+        .value = "";
+
+      tampilBarcode("Belum ada");
+
+      tampilStatus(
+        "Form berhasil direset.",
+        ""
+      );
+
+      document.getElementById("btnScan")
+        .disabled = false;
+    }
+
+
+    document.getElementById("barcodeInput")
+      .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+
+          event.preventDefault();
+
+          const barcode =
+            this.value.trim();
+
+          if (!barcode) {
+
+            tampilStatus(
+              "Barcode masih kosong.",
+              "error"
+            );
+
+            return;
+          }
+
+          berhasilScan(barcode);
+        }
+
+      });
+
+
+    window.onload = function() {
+
+      document.getElementById("admin")
+        .focus();
+
+    };
+
+  </script>
 
 </body>
 </html>
