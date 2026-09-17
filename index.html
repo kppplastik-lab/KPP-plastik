@@ -316,7 +316,27 @@
 
     const WEB_APP_URL =
       "https://script.google.com/macros/s/AKfycbxIkJf8WpjZ8Nk6LAbPELFzL_hCaze1N4QJH07XdpicuiqrzolPylIa6ltOHbVtiHdG/exec";
+    
+function kirimBarcodeKeSheet(barcode) {
+  const jenis = document.getElementById("jenis").value;
+  const mesin = document.getElementById("mesin").value;
+  const admin = document.getElementById("admin").value;
 
+  if (!barcode) {
+    alert("Barcode kosong");
+    return;
+  }
+
+  const url =
+    WEB_APP_URL +
+    "?barcode=" + encodeURIComponent(barcode) +
+    "&jenis=" + encodeURIComponent(jenis) +
+    "&mesin=" + encodeURIComponent(mesin) +
+    "&admin=" + encodeURIComponent(admin);
+
+  // Ini yang membuat hasil scan masuk ke Sheet
+  window.location.href = url;
+}
 
     let scanner = null;
     let sudahScan = false;
